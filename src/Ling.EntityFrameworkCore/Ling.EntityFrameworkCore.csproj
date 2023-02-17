@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0;net7.0;</TargetFrameworks>
+  </PropertyGroup>
+
+	<PropertyGroup>
+		<PackageId>Ling.EntityFrameworkCore</PackageId>
+		<PackageVersion>1.0.0</PackageVersion>
+		<Description>Ling.EntityFrameworkCore is an extension library of Microsoft.EntityFrameworkCore.</Description>
+		<PackageTags>ling;efcore;entityframeworkcore;</PackageTags>
+		<PackageReleaseNotes>Please Check https://github.com/ling921/dotnet-lib/blob/master/src/Ling.EntityFrameworkCore/RELEASE.md</PackageReleaseNotes>
+	</PropertyGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
+		<PackageReference Include="Microsoft.EntityFrameworkCore" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'net7.0' ">
+		<PackageReference Include="Microsoft.EntityFrameworkCore" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="README.md" Pack="true" PackagePath="\" />
+		<None Include="RELEASE.md" Pack="true" PackagePath="\" />
+	</ItemGroup>
+
+</Project>

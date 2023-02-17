@@ -1,0 +1,72 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{24190368-2682-445A-B3DE-DBDCA91CC22D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "git", "git", "{24AEB73B-1853-4DA5-BED5-975FEE5F79BE}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ling.Audit.Abstractions", "src\Ling.Audit.Abstractions\Ling.Audit.Abstractions.csproj", "{4729B7CD-2D96-4A1A-AEC9-A89B52DACB9A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ling.Audit", "src\Ling.Audit\Ling.Audit.csproj", "{E48280AB-4464-4A7B-A5E8-35C42221A516}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution", "solution", "{2ADA4DE0-967D-4739-8B08-F49938C56152}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ling.EntityFrameworkCore", "src\Ling.EntityFrameworkCore\Ling.EntityFrameworkCore.csproj", "{CE08DBBE-B00B-489E-A698-3BB236E0C97F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ling.EntityFrameworkCore.Audit", "src\Ling.EntityFrameworkCore.Audit\Ling.EntityFrameworkCore.Audit.csproj", "{A260608F-81AD-4A77-A05E-BA011E2A7C62}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ling.Cache", "src\Ling.Cache\Ling.Cache.csproj", "{AFC17BBE-556E-4541-B0F0-05E370008C29}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4729B7CD-2D96-4A1A-AEC9-A89B52DACB9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4729B7CD-2D96-4A1A-AEC9-A89B52DACB9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4729B7CD-2D96-4A1A-AEC9-A89B52DACB9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4729B7CD-2D96-4A1A-AEC9-A89B52DACB9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E48280AB-4464-4A7B-A5E8-35C42221A516}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E48280AB-4464-4A7B-A5E8-35C42221A516}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E48280AB-4464-4A7B-A5E8-35C42221A516}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E48280AB-4464-4A7B-A5E8-35C42221A516}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE08DBBE-B00B-489E-A698-3BB236E0C97F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE08DBBE-B00B-489E-A698-3BB236E0C97F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE08DBBE-B00B-489E-A698-3BB236E0C97F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE08DBBE-B00B-489E-A698-3BB236E0C97F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A260608F-81AD-4A77-A05E-BA011E2A7C62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A260608F-81AD-4A77-A05E-BA011E2A7C62}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A260608F-81AD-4A77-A05E-BA011E2A7C62}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A260608F-81AD-4A77-A05E-BA011E2A7C62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFC17BBE-556E-4541-B0F0-05E370008C29}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFC17BBE-556E-4541-B0F0-05E370008C29}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFC17BBE-556E-4541-B0F0-05E370008C29}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFC17BBE-556E-4541-B0F0-05E370008C29}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4729B7CD-2D96-4A1A-AEC9-A89B52DACB9A} = {24190368-2682-445A-B3DE-DBDCA91CC22D}
+		{E48280AB-4464-4A7B-A5E8-35C42221A516} = {24190368-2682-445A-B3DE-DBDCA91CC22D}
+		{CE08DBBE-B00B-489E-A698-3BB236E0C97F} = {24190368-2682-445A-B3DE-DBDCA91CC22D}
+		{A260608F-81AD-4A77-A05E-BA011E2A7C62} = {24190368-2682-445A-B3DE-DBDCA91CC22D}
+		{AFC17BBE-556E-4541-B0F0-05E370008C29} = {24190368-2682-445A-B3DE-DBDCA91CC22D}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1A856CE4-1FBD-47C1-8117-82B5C4C6CD5E}
+	EndGlobalSection
+EndGlobal
