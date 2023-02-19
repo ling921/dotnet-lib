@@ -1,8 +1,8 @@
-﻿using LingDev.EntityFrameworkCore.Abstractions;
+﻿using Ling.EntityFrameworkCore.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace LingDev.Linq;
+namespace Ling.Linq;
 
 /// <summary>
 /// Extension methods for <see cref="IQueryable{TSource}"/>.

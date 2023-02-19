@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
@@ -16,6 +17,11 @@ namespace Ling.EntityFrameworkCore.Extensions;
 /// </summary>
 public static class ModelBuilderExtensions
 {
+    /// <summary>
+    /// Gets whether the current program is running at design time.
+    /// </summary>
+    public static bool IsDesignTime => Process.GetCurrentProcess().ProcessName == "dotnet";
+
     #region Public Methods
 
     /// <summary>
@@ -117,6 +123,11 @@ public static class ModelBuilderExtensions
             }
 
             entityType.SetAuditMetadata(auditMetadata);
+
+            if (IsDesignTime)
+            {
+                entityType.RemoveAnnotation(AuditAnnotationNames.Metadata);
+            }
         }
     }
 
