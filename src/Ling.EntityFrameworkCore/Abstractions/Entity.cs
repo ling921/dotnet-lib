@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace LingDev.EntityFrameworkCore.Abstractions;
+namespace Ling.EntityFrameworkCore.Abstractions;
 
 /// <summary>
 /// Represents an entity with a single primary key with "Id" property.
