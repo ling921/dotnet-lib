@@ -8,7 +8,7 @@ internal sealed class UserProviderExtension<TUserProvider> : IDbContextOptionsEx
     where TUserProvider : class, IAuditUserProvider
 {
     /// <inheritdoc/>
-    public DbContextOptionsExtensionInfo Info => new ExtensionInfo(this);
+    public DbContextOptionsExtensionInfo Info => new UserProviderExtensionInfo(this);
 
     /// <inheritdoc/>
     public void ApplyServices(IServiceCollection services)
@@ -19,5 +19,23 @@ internal sealed class UserProviderExtension<TUserProvider> : IDbContextOptionsEx
     /// <inheritdoc/>
     public void Validate(IDbContextOptions options)
     {
+    }
+
+    private class UserProviderExtensionInfo : DbContextOptionsExtensionInfo
+    {
+        public override bool IsDatabaseProvider { get; }
+        public override string LogFragment { get; } = string.Empty;
+
+        public UserProviderExtensionInfo(IDbContextOptionsExtension extension) : base(extension)
+        {
+        }
+
+        public override int GetServiceProviderHashCode() => 0;
+
+        public override bool ShouldUseSameServiceProvider(DbContextOptionsExtensionInfo other) => other is UserProviderExtensionInfo;
+
+        public override void PopulateDebugInfo(IDictionary<string, string> debugInfo)
+        {
+        }
     }
 }

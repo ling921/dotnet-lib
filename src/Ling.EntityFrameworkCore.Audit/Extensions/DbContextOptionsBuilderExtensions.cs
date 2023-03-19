@@ -55,7 +55,7 @@ public static class DbContextOptionsBuilderExtensions
 
     private static DbContextOptionsBuilder UseAuditOption(this DbContextOptionsBuilder builder, Action<AuditOptions>? setupAction)
     {
-        var extension = new AuditOptionsExtension(setupAction);
+        var extension = builder.Options.FindExtension<AuditOptionsExtension>() ?? new AuditOptionsExtension(setupAction);
 
         ((IDbContextOptionsBuilderInfrastructure)builder).AddOrUpdateExtension(extension);
 
@@ -65,7 +65,7 @@ public static class DbContextOptionsBuilderExtensions
     private static DbContextOptionsBuilder UseAuditUserProvider<TUserProvider>(this DbContextOptionsBuilder builder)
             where TUserProvider : class, IAuditUserProvider
     {
-        var extension = new UserProviderExtension<TUserProvider>();
+        var extension = builder.Options.FindExtension<UserProviderExtension<TUserProvider>>() ?? new UserProviderExtension<TUserProvider>();
 
         ((IDbContextOptionsBuilderInfrastructure)builder).AddOrUpdateExtension(extension);
 
@@ -74,7 +74,7 @@ public static class DbContextOptionsBuilderExtensions
 
     private static DbContextOptionsBuilder UseAuditConvention(this DbContextOptionsBuilder builder)
     {
-        var extension = new AuditConventionExtension();
+        var extension = builder.Options.FindExtension<AuditConventionExtension>() ?? new AuditConventionExtension();
 
         ((IDbContextOptionsBuilderInfrastructure)builder).AddOrUpdateExtension(extension);
 
