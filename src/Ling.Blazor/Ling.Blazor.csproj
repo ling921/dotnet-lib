@@ -11,6 +11,10 @@
 		<PackageTags>ling;blazor;components;</PackageTags>
 		<PackageReleaseNotes>Please Check https://github.com/ling921/dotnet-lib/blob/master/src/Ling.Blazor/RELEASE.md</PackageReleaseNotes>
 	</PropertyGroup>
+  
+  <ItemGroup>
+    <SupportedPlatform Include="browser" />
+  </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <PackageReference Include="Microsoft.AspNetCore.Components" />
