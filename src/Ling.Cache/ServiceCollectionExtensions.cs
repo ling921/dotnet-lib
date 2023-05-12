@@ -22,8 +22,8 @@ public static class ServiceCollectionExtensions
     {
         ArgumentNullException.ThrowIfNull(services);
 
-        services.AddDistributedCache(delegate { });
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IConfigureOptions<CacheOptions>, CacheConfigureOptions>());
+        services.AddDistributedCache(delegate { });
 
         return services;
     }
