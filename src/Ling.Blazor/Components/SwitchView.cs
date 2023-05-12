@@ -40,7 +40,6 @@ public sealed class SwitchView<TValue> : ComponentBase where TValue : notnull
     /// <inheritdoc/>
     protected override void BuildRenderTree(RenderTreeBuilder builder)
     {
-        // Provide the value and the component instance to child components
         builder.OpenComponent<CascadingValue<SwitchView<TValue>>>(0);
         builder.AddAttribute(1, "Value", this);
 
@@ -49,7 +48,6 @@ public sealed class SwitchView<TValue> : ComponentBase where TValue : notnull
         {
             rtb.AddContent(3, ChildContent);
 
-            // Render SwitchUnmatched if no SwitchCase has matched
             rtb.OpenComponent<SwitchUnmatched<TValue>>(4);
             rtb.CloseComponent();
         }));
@@ -63,7 +61,6 @@ public sealed class SwitchView<TValue> : ComponentBase where TValue : notnull
 
         protected override void BuildRenderTree(RenderTreeBuilder builder)
         {
-            // Render the fallback content if no SwitchCase has matched
             if (!Parent.IsMatched && !Parent.IsDefaultRendered)
             {
                 builder.AddContent(0, Parent.FallbackContent);
@@ -103,22 +100,17 @@ public sealed class SwitchCase<TValue> : ComponentBase where TValue : notnull
     /// <inheritdoc/>
     protected override void BuildRenderTree(RenderTreeBuilder builder)
     {
-        // Render the child content if the value matches
         if (EqualityComparer<TValue?>.Default.Equals(Parent.Value, When))
         {
-            // Check for invalid use of SwitchDefault or duplicated
             if (Parent.IsDefaultRendered)
             {
-                // Throw an exception if SwitchDefault is used improperly.
                 throw new InvalidOperationException("'SwitchDefault' must be placed below all 'SwitchCase' components.");
             }
             if (Parent.IsMatched)
             {
-                // Throw an exception if there is a duplicated 'When' condition.
                 throw new InvalidOperationException("A 'SwitchCase' component with the same 'When' condition already exists.");
             }
             Parent.IsMatched = true;
-            // Add the child content to the render tree.
             builder.AddContent(1, ChildContent);
         }
     }

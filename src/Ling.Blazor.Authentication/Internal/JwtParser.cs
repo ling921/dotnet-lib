@@ -16,7 +16,7 @@ internal static class JwtParser
     /// <param name="options">The authentication options.</param>
     /// <param name="userPrincipal">The user claims principal in JWT.</param>
     /// <returns><see langword="true"/> if read successfully; otherwise, <see langword="false"/>.</returns>
-    public static bool TryRead(string? token, AuthOptions options, [NotNullWhen(true)] out ClaimsPrincipal? userPrincipal)
+    public static bool TryRead(string? token, AuthenticationOptions options, [NotNullWhen(true)] out ClaimsPrincipal? userPrincipal)
     {
         if (!string.IsNullOrWhiteSpace(token))
         {

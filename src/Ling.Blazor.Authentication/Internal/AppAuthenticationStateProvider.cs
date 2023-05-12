@@ -11,11 +11,11 @@ internal class AppAuthenticationStateProvider : AuthenticationStateProvider, ITo
 {
     private const string _tokenKey = "Ling.UserToken";
     private readonly ILocalStorageService _localStorage;
-    private readonly IOptions<AuthOptions> _optionsAccessor;
+    private readonly IOptions<AuthenticationOptions> _optionsAccessor;
 
     public AppAuthenticationStateProvider(
         ILocalStorageService localStorage,
-        IOptions<AuthOptions> optionsAccessor)
+        IOptions<AuthenticationOptions> optionsAccessor)
     {
         _localStorage = localStorage;
         _optionsAccessor = optionsAccessor;

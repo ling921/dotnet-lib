@@ -25,18 +25,18 @@ internal static class ServiceCollectionExtensions
     /// Add jwt authorization services.
     /// </summary>
     /// <param name="services">The <see cref="IServiceCollection" /> to add services to.</param>
-    /// <param name="setupAction">An <see cref="Action{AuthOptions}"/> to configure the provided <see cref="AuthOptions"/>.</param>
+    /// <param name="setupAction">An <see cref="Action{AuthOptions}"/> to configure the provided <see cref="AuthenticationOptions"/>.</param>
     /// <returns>The <see cref="IServiceCollection"/> so that additional calls can be chained.</returns>
     /// <exception cref="ArgumentNullException"></exception>
     public static IServiceCollection AddJwtAuthorization<TAuthenticationService>(
         this IServiceCollection services,
-        Action<AuthOptions> setupAction)
+        Action<AuthenticationOptions> setupAction)
         where TAuthenticationService : AuthenticationServiceBase
     {
         ArgumentNullException.ThrowIfNull(services);
         ArgumentNullException.ThrowIfNull(setupAction);
 
-        services.Configure<AuthOptions>(setupAction);
+        services.Configure<AuthenticationOptions>(setupAction);
 
         services.AddAuthorizationCore();
         services.AddScoped<AuthenticationStateProvider, AppAuthenticationStateProvider>();

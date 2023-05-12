@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 
 namespace Ling.Blazor.Authentication.Internal;
@@ -7,13 +8,16 @@ namespace Ling.Blazor.Authentication.Internal;
 internal class AppAuthorizationMessageHandler : DelegatingHandler, IDisposable
 {
     private readonly ITokenService _tokenService;
+    private readonly IOptionsSnapshot<AuthenticationOptions> _optionsAccessor;
+
     private readonly AuthenticationStateChangedHandler? _authenticationStateChangedHandler;
     private TokenInfo? _lastToken;
     private AuthenticationHeaderValue? _cachedHeader;
 
-    public AppAuthorizationMessageHandler(ITokenService tokenService)
+    public AppAuthorizationMessageHandler(ITokenService tokenService, IOptionsSnapshot<AuthenticationOptions> optionsAccessor)
     {
         _tokenService = tokenService;
+        _optionsAccessor = optionsAccessor;
 
         // Invalidate the cached _lastToken when the authentication state changes
         if (_tokenService is AuthenticationStateProvider authStateProvider)
@@ -32,7 +36,7 @@ internal class AppAuthorizationMessageHandler : DelegatingHandler, IDisposable
             if (token is not null)
             {
                 _lastToken = token;
-                _cachedHeader = new AuthenticationHeaderValue("Bearer", _lastToken.AccessToken);
+                _cachedHeader = new AuthenticationHeaderValue(_optionsAccessor.Value.AuthenticationScheme, _lastToken.AccessToken);
             }
             else
             {
