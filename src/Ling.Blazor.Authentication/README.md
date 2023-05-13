@@ -21,9 +21,9 @@ dotnet add package Ling.Blazor.Authentication
 
 To use this library, you need to follow these steps:
 
-1. Implement your own `AuthenticationService` class that inherits from `AuthenticationServiceBase` class. For example:
+1. Implement your own `JwtAuthenticationService` class that inherits from `JwtAuthenticationServiceBase` class. For example:
 ```csharp
-public class AuthenticationService : AuthenticationServiceBase
+public class JwtAuthenticationService : JwtAuthenticationServiceBase
 {
     public AuthenticationService(IServiceProvider serviceProvider) : base(serviceProvider)
     {
@@ -33,7 +33,7 @@ public class AuthenticationService : AuthenticationServiceBase
     {
        // Write your login logic here and get the tokenInfo object
 
-       // Remember to call 'SetTokenAsync' to save the tokenInfo object
+       // Remember to call 'SetTokenAsync' to save the tokenInfo
        await SetTokenAsync(tokenInfo, cancellationToken);
     }
 }
@@ -41,7 +41,7 @@ public class AuthenticationService : AuthenticationServiceBase
 
 2. Register the services in `Program.cs` file. For example:
 ```csharp
-builder.Services.AddJwtAuthorization<AuthenticationService>(); // You can configure 'AuthenticationOptions' here if needed
+builder.Services.AddJwtAuthorization<JwtAuthenticationService>(); // You can configure 'JwtAuthOptions' here if needed
 
 builder.Services.AddServerAPI(baseAddress); // Replace baseAddress with your actual API server address
 ```
