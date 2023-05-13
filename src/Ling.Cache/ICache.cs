@@ -81,7 +81,6 @@ public interface ICache
     /// <summary>
     /// Gets a value with the given key, then removes the value with the given key.
     /// </summary>
-    /// <typeparam name="T">The data type.</typeparam>
     /// <param name="key">A string identifying the requested value.</param>
     /// <returns>The located value or null.</returns>
     string? GetAndRemove(string key);

@@ -1,32 +1,31 @@
-﻿using Ling.Blazor.Authentication.Internal;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace Ling.Blazor.Authentication;
+namespace Ling.Blazor.Authentication.JwtBearer;
 
 /// <summary>
-/// An abstract base class for implementing authentication services.
+/// An abstract base class for implementing JWT authentication services.
 /// </summary>
-public abstract class AuthenticationServiceBase : IAuthenticationService
+public abstract class JwtAuthenticationServiceBase : IJwtAuthenticationService
 {
     /// <summary>
     /// Gets the service provider for dependency injection.
     /// </summary>
     protected readonly IServiceProvider ServiceProvider;
 
-    private readonly ITokenService _tokenService;
+    private readonly IJwtTokenService _tokenService;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="AuthenticationServiceBase"/> class.
+    /// Initializes a new instance of the <see cref="JwtAuthenticationServiceBase"/> class.
     /// </summary>
     /// <param name="serviceProvider">The service provider for dependency injection.</param>
-    protected AuthenticationServiceBase(IServiceProvider serviceProvider)
+    protected JwtAuthenticationServiceBase(IServiceProvider serviceProvider)
     {
         ServiceProvider = serviceProvider;
-        _tokenService = ServiceProvider.GetRequiredService<ITokenService>();
+        _tokenService = ServiceProvider.GetRequiredService<IJwtTokenService>();
     }
 
     /// <inheritdoc/>
-    /// <remarks>Should call method 'SetTokenAsync'</remarks>
+    /// <remarks>Implementations should call the method 'SetTokenAsync' to set the authentication token for the user.</remarks>
     public abstract Task LoginAsync(string username, string password, bool isPersistent = false, CancellationToken cancellationToken = default);
 
     /// <inheritdoc/>
@@ -40,7 +39,7 @@ public abstract class AuthenticationServiceBase : IAuthenticationService
     /// </summary>
     /// <param name="token">The token information to set.</param>
     /// <param name="cancellationToken">A cancellation token that can be used to cancel the operation.</param>
-    protected async Task SetTokenAsync(TokenInfo token, CancellationToken cancellationToken = default)
+    protected virtual async Task SetTokenAsync(JwtTokenInfo token, CancellationToken cancellationToken = default)
     {
         await _tokenService.SetTokenAsync(token, cancellationToken);
     }
