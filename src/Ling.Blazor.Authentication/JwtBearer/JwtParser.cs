@@ -2,10 +2,10 @@
 using System.Security.Claims;
 using System.Text.Json;
 
-namespace Ling.Blazor.Authentication.Internal;
+namespace Ling.Blazor.Authentication.JwtBearer;
 
 /// <summary>
-/// Extension method for JWT.
+/// Provides functionality for parsing JWT strings and creating claims principals.
 /// </summary>
 internal static class JwtParser
 {
@@ -16,7 +16,7 @@ internal static class JwtParser
     /// <param name="options">The authentication options.</param>
     /// <param name="userPrincipal">The user claims principal in JWT.</param>
     /// <returns><see langword="true"/> if read successfully; otherwise, <see langword="false"/>.</returns>
-    public static bool TryRead(string? token, AuthenticationOptions options, [NotNullWhen(true)] out ClaimsPrincipal? userPrincipal)
+    public static bool TryRead(string? token, JwtAuthOptions options, [NotNullWhen(true)] out ClaimsPrincipal? userPrincipal)
     {
         if (!string.IsNullOrWhiteSpace(token))
         {
@@ -32,7 +32,6 @@ internal static class JwtParser
                     ReadJsonProperty(claims, jsonProperty);
                 }
 
-                //Console.Out.WriteLine<List<Claim>>(claims);
                 if (claims.Find(c => c.Type == "exp") is Claim ec &&
                     long.TryParse(ec.Value, out var expires) &&
                     new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddSeconds(expires) <= DateTime.UtcNow)
@@ -41,7 +40,7 @@ internal static class JwtParser
                     return false;
                 }
 
-                userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims, "Bearer", options.UserIdClaimType, options.RoleClaimType));
+                userPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims, options.AuthenticationScheme, options.UserIdClaimType, options.RoleClaimType));
                 return true;
             }
             catch { }
@@ -51,6 +50,11 @@ internal static class JwtParser
         return false;
     }
 
+    /// <summary>
+    /// Decodes the base64url-encoded string into a byte array.
+    /// </summary>
+    /// <param name="base64UrlEncodedString">The base64url-encoded string.</param>
+    /// <returns>The decoded byte array.</returns>
     private static byte[] Base64UrlDecode(string base64UrlEncodedString)
         => (base64UrlEncodedString.Length % 4) switch
         {
@@ -59,6 +63,11 @@ internal static class JwtParser
             _ => Convert.FromBase64String(base64UrlEncodedString),
         };
 
+    /// <summary>
+    /// Reads a JSON property and adds it as a claim to the specified list of claims.
+    /// </summary>
+    /// <param name="claims">The list of claims to add to.</param>
+    /// <param name="jsonProperty">The JSON property to read.</param>
     private static void ReadJsonProperty(List<Claim> claims, JsonProperty jsonProperty)
     {
         switch (jsonProperty.Value.ValueKind)

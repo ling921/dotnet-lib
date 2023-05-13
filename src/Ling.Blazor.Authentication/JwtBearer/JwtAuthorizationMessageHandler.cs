@@ -2,19 +2,26 @@
 using Microsoft.Extensions.Options;
 using System.Net.Http.Headers;
 
-namespace Ling.Blazor.Authentication.Internal;
+namespace Ling.Blazor.Authentication.JwtBearer;
 
-/// <inheritdoc/>
-internal class AppAuthorizationMessageHandler : DelegatingHandler, IDisposable
+/// <summary>
+/// Handles adding the Authorization header with a JWT token to outgoing HTTP requests.
+/// </summary>
+internal class JwtAuthorizationMessageHandler : DelegatingHandler, IDisposable
 {
-    private readonly ITokenService _tokenService;
-    private readonly IOptionsSnapshot<AuthenticationOptions> _optionsAccessor;
+    private readonly IJwtTokenService _tokenService;
+    private readonly IOptionsSnapshot<JwtAuthOptions> _optionsAccessor;
 
     private readonly AuthenticationStateChangedHandler? _authenticationStateChangedHandler;
-    private TokenInfo? _lastToken;
+    private JwtTokenInfo? _lastToken;
     private AuthenticationHeaderValue? _cachedHeader;
 
-    public AppAuthorizationMessageHandler(ITokenService tokenService, IOptionsSnapshot<AuthenticationOptions> optionsAccessor)
+    /// <summary>
+    /// Initializes a new instance of the JwtAuthorizationMessageHandler class.
+    /// </summary>
+    /// <param name="tokenService">The service used to retrieve JWT tokens.</param>
+    /// <param name="optionsAccessor">The options accessor for authentication options.</param>
+    public JwtAuthorizationMessageHandler(IJwtTokenService tokenService, IOptionsSnapshot<JwtAuthOptions> optionsAccessor)
     {
         _tokenService = tokenService;
         _optionsAccessor = optionsAccessor;
@@ -22,11 +29,12 @@ internal class AppAuthorizationMessageHandler : DelegatingHandler, IDisposable
         // Invalidate the cached _lastToken when the authentication state changes
         if (_tokenService is AuthenticationStateProvider authStateProvider)
         {
-            _authenticationStateChangedHandler = _ => { _lastToken = null; };
+            _authenticationStateChangedHandler = _ => _lastToken = null;
             authStateProvider.AuthenticationStateChanged += _authenticationStateChangedHandler;
         }
     }
 
+    /// <inheritdoc />
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         if (_lastToken == null || DateTimeOffset.Now >= _lastToken.Expires.AddMinutes(-5))
@@ -38,10 +46,6 @@ internal class AppAuthorizationMessageHandler : DelegatingHandler, IDisposable
                 _lastToken = token;
                 _cachedHeader = new AuthenticationHeaderValue(_optionsAccessor.Value.AuthenticationScheme, _lastToken.AccessToken);
             }
-            else
-            {
-                //throw new AccessTokenNotAvailableException(_navigation, tokenResult, _tokenOptions?.Scopes);
-            }
         }
 
         // We don't try to handle 401s and retry the request with a new token automatically since that would mean we need to copy the request
@@ -52,6 +56,7 @@ internal class AppAuthorizationMessageHandler : DelegatingHandler, IDisposable
         return await base.SendAsync(request, cancellationToken);
     }
 
+    /// <inheritdoc />
     void IDisposable.Dispose()
     {
         if (_tokenService is AuthenticationStateProvider authStateProvider)

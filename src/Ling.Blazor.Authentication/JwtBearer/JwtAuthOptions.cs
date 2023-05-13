@@ -1,11 +1,11 @@
 ﻿using System.Security.Claims;
 
-namespace Ling.Blazor.Authentication;
+namespace Ling.Blazor.Authentication.JwtBearer;
 
 /// <summary>
-/// A class that represents authentication options.
+/// A class that represents JWT authentication options.
 /// </summary>
-public sealed class AuthenticationOptions
+public sealed class JwtAuthOptions
 {
     /// <summary>
     /// Gets or sets the name of the authentication scheme, which defaults to "Bearer".
@@ -21,4 +21,9 @@ public sealed class AuthenticationOptions
     /// Gets or sets the type of the claim that represents the user role, which defaults to ClaimTypes.Role.
     /// </summary>
     public string RoleClaimType { get; set; } = ClaimTypes.Role;
+
+    /// <summary>
+    /// Gets or sets the key used to store the user token in a persistence store.
+    /// </summary>
+    public string TokenPersistenceKey { get; set; } = "Ling.UserToken";
 }

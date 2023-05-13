@@ -6,7 +6,7 @@
 
   <PropertyGroup>
     <PackageId>Ling.Blazor.Authentication</PackageId>
-    <PackageVersion>0.0.1</PackageVersion>
+    <PackageVersion>0.0.4</PackageVersion>
     <Description>Ling.Blazor.Authentication is an authentication library of Blazor.</Description>
     <PackageTags>ling;blazor;authentication;</PackageTags>
     <PackageReleaseNotes>Please Check https://github.com/ling921/dotnet-lib/blob/master/src/Ling.Blazor.Authentication/RELEASE.md</PackageReleaseNotes>

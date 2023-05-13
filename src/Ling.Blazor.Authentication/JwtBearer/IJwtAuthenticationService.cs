@@ -1,9 +1,9 @@
-﻿namespace Ling.Blazor.Authentication.Internal;
+﻿namespace Ling.Blazor.Authentication.JwtBearer;
 
 /// <summary>
-/// An internal interface that defines the methods for authentication service
+/// An interface that defines the methods for JWT authentication service
 /// </summary>
-internal interface IAuthenticationService
+public interface IJwtAuthenticationService
 {
     /// <summary>
     /// A method that performs asynchronous login with the given username, password and persistence option
