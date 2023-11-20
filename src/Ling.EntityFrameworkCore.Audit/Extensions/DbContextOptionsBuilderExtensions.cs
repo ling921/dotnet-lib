@@ -23,11 +23,11 @@ public static class DbContextOptionsBuilderExtensions
         ArgumentNullException.ThrowIfNull(builder);
 
         builder.UseAuditOption(setupAction);
-        builder.UseAuditUserProvider<DefaultAuditUserProvider>();
+        builder.UseAuditUserProvider<DefaultAuditUserProvider, string>();
         builder.UseAuditConvention();
 
-        builder.AddInterceptors(new AuditInterceptor());
-        builder.ReplaceService<IModelCustomizer, AuditModelCustomizer>();
+        builder.AddInterceptors(new AuditInterceptor<string>());
+        builder.ReplaceService<IModelCustomizer, AuditModelCustomizer<string>>();
 
         return builder;
     }
@@ -38,17 +38,19 @@ public static class DbContextOptionsBuilderExtensions
     /// </summary>
     /// <param name="builder">The <see cref="DbContextOptionsBuilder"/>.</param>
     /// <param name="setupAction">The action used to configure the <see cref="AuditOptions"/>.</param>
-    public static DbContextOptionsBuilder UseAudit<TUserProvider>(this DbContextOptionsBuilder builder, Action<AuditOptions>? setupAction = null)
-        where TUserProvider : class, IAuditUserProvider
+    public static DbContextOptionsBuilder UseAudit<TUserProvider, TUserKey>(
+        this DbContextOptionsBuilder builder,
+        Action<AuditOptions>? setupAction = null)
+        where TUserProvider : class, IAuditUserProvider<TUserKey>
     {
         ArgumentNullException.ThrowIfNull(builder);
 
         builder.UseAuditOption(setupAction);
-        builder.UseAuditUserProvider<TUserProvider>();
+        builder.UseAuditUserProvider<TUserProvider, TUserKey>();
         builder.UseAuditConvention();
 
-        builder.AddInterceptors(new AuditInterceptor());
-        builder.ReplaceService<IModelCustomizer, AuditModelCustomizer>();
+        builder.AddInterceptors(new AuditInterceptor<TUserKey>());
+        builder.ReplaceService<IModelCustomizer, AuditModelCustomizer<TUserKey>>();
 
         return builder;
     }
@@ -62,10 +64,11 @@ public static class DbContextOptionsBuilderExtensions
         return builder;
     }
 
-    private static DbContextOptionsBuilder UseAuditUserProvider<TUserProvider>(this DbContextOptionsBuilder builder)
-            where TUserProvider : class, IAuditUserProvider
+    private static DbContextOptionsBuilder UseAuditUserProvider<TUserProvider, TUserKey>(this DbContextOptionsBuilder builder)
+            where TUserProvider : class, IAuditUserProvider<TUserKey>
     {
-        var extension = builder.Options.FindExtension<UserProviderExtension<TUserProvider>>() ?? new UserProviderExtension<TUserProvider>();
+        var extension = builder.Options.FindExtension<UserProviderExtension<TUserProvider, TUserKey>>()
+            ?? new UserProviderExtension<TUserProvider, TUserKey>();
 
         ((IDbContextOptionsBuilderInfrastructure)builder).AddOrUpdateExtension(extension);
 

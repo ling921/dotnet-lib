@@ -5,7 +5,7 @@ namespace Ling.EntityFrameworkCore.Audit.Models;
 /// <summary>
 /// Represents the audit log.
 /// </summary>
-public class AuditLog
+public class AuditLog<TUserKey>
 {
     /// <summary>
     /// Gets or sets the primary key.
@@ -45,7 +45,7 @@ public class AuditLog
     /// <summary>
     /// Gets or sets the identity of user who change entity.
     /// </summary>
-    public string? OperatorId { get; set; }
+    public TUserKey? OperatorId { get; set; }
 
     /// <summary>
     /// Gets or sets the name of user who change entity.

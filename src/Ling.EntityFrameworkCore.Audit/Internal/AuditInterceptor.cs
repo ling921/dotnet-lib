@@ -14,7 +14,7 @@ using System.Text.Json;
 
 namespace Ling.EntityFrameworkCore.Audit.Internal;
 
-internal sealed class AuditInterceptor : SaveChangesInterceptor
+internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
 {
     private static readonly ConcurrentDictionary<DbContextId, List<AuditEntry>> s_contextEntries = new();
 
@@ -27,7 +27,7 @@ internal sealed class AuditInterceptor : SaveChangesInterceptor
         var context = eventData.Context;
         if (context is not null)
         {
-            var userProvider = context.GetService<IAuditUserProvider>();
+            var userProvider = context.GetService<IAuditUserProvider<TUserKey>>();
             var options = context.GetService<IOptionsSnapshot<AuditOptions>>().Value;
             var entries = AuditEntries(context, options, userProvider).ToList();
 
@@ -56,9 +56,9 @@ internal sealed class AuditInterceptor : SaveChangesInterceptor
                 throw new InvalidOperationException("Unable to get entry information before saving changes.");
             }
 
-            var userProvider = context.GetService<IAuditUserProvider>();
+            var userProvider = context.GetService<IAuditUserProvider<TUserKey>>();
             var logs = entryInfo
-                .ConvertAll(i => new AuditLog
+                .ConvertAll(i => new AuditLog<TUserKey>
                 {
                     Schema = i.Schema,
                     Table = i.Table,
@@ -66,7 +66,7 @@ internal sealed class AuditInterceptor : SaveChangesInterceptor
                     EntityType = i.EntityType,
                     EventType = i.EventType,
                     EventTime = DateTimeOffset.Now,
-                    OperatorId = userProvider.Identity,
+                    OperatorId = userProvider.Id,
                     OperatorName = userProvider.Name,
                     Details = i.Properties.ConvertAll(ii => new AuditLogDetail
                     {
@@ -88,15 +88,21 @@ internal sealed class AuditInterceptor : SaveChangesInterceptor
         return await base.SavedChangesAsync(eventData, result, cancellationToken);
     }
 
-    private static IEnumerable<AuditEntry> AuditEntries(DbContext context, AuditOptions options, IAuditUserProvider userProvider)
+    private static IEnumerable<AuditEntry> AuditEntries(DbContext context, AuditOptions options, IAuditUserProvider<TUserKey> userProvider)
     {
         var now = DateTimeOffset.Now;
-        var isDefault = string.IsNullOrWhiteSpace(userProvider.Identity);
+        var isDefault = EqualityComparer<TUserKey>.Default.Equals(userProvider.Id, default);
         foreach (var entityEntry in context.ChangeTracker.Entries())
         {
             var entityType = entityEntry.Metadata.ClrType;
             var metadata = entityEntry.Metadata.GetAuditMetadata();
             var eventType = EventType.None;
+
+            if (IsSameTypeIgnoreNullable(metadata.UserKeyType, typeof(TUserKey)))
+            {
+                throw new InvalidOperationException($"The type of 'TUserKey' configured is not match entity [{entityType}].");
+            }
+
             switch (entityEntry.State)
             {
                 case EntityState.Deleted:
@@ -113,7 +119,7 @@ internal sealed class AuditInterceptor : SaveChangesInterceptor
                         {
                             throw new InvalidOperationException($"Anonymous deletion of {entityType.GetFriendlyName()} is not allowed.");
                         }
-                        entityEntry.Property(Constants.DeleterId).CurrentValue = userProvider.GeIdentityOfType(metadata.UserKeyType!);
+                        entityEntry.Property(Constants.DeleterId).CurrentValue = userProvider.Id;
                     }
 
                     if (metadata.HasIsDeleted)
@@ -142,7 +148,7 @@ internal sealed class AuditInterceptor : SaveChangesInterceptor
                             throw new InvalidOperationException($"Anonymous modification of {entityType.GetFriendlyName()} is not allowed.");
                         }
 
-                        entityEntry.Property(Constants.LastModifierId).CurrentValue = userProvider.GeIdentityOfType(metadata.UserKeyType!);
+                        entityEntry.Property(Constants.LastModifierId).CurrentValue = userProvider.Id;
                     }
                     eventType = GetModifiedType(entityEntry, metadata);
                     break;
@@ -160,7 +166,7 @@ internal sealed class AuditInterceptor : SaveChangesInterceptor
                         {
                             throw new InvalidOperationException($"Anonymous creation of {entityType.GetFriendlyName()} is not allowed.");
                         }
-                        entityEntry.Property(Constants.CreatorId).CurrentValue = userProvider.GeIdentityOfType(metadata.UserKeyType!);
+                        entityEntry.Property(Constants.CreatorId).CurrentValue = userProvider.Id;
                     }
                     eventType = EventType.Create;
                     break;
@@ -240,4 +246,9 @@ internal sealed class AuditInterceptor : SaveChangesInterceptor
             ? value.ToString()
             : JsonSerializer.Serialize(value);
     }
+
+    private static bool IsSameTypeIgnoreNullable(Type? a, Type? b)
+        => a is not null
+        && b is not null
+        && (Nullable.GetUnderlyingType(a) ?? a) == (Nullable.GetUnderlyingType(b) ?? b);
 }

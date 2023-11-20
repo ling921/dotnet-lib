@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Ling.EntityFrameworkCore.Audit.TypeConfigurations;
 
-internal sealed class AuditLogTypeConfiguration : IEntityTypeConfiguration<AuditLog>
+internal sealed class AuditLogTypeConfiguration<TUserKey> : IEntityTypeConfiguration<AuditLog<TUserKey>>
 {
-    public void Configure(EntityTypeBuilder<AuditLog> builder)
+    public void Configure(EntityTypeBuilder<AuditLog<TUserKey>> builder)
     {
 #if NET7_0_OR_GREATER
         builder.ToTable("AuditLogs", t => t.HasComment("A table that stores changes to entity properties."))
@@ -51,8 +51,6 @@ internal sealed class AuditLogTypeConfiguration : IEntityTypeConfiguration<Audit
                .HasComment("The time the audit event occurred.");
 
         builder.Property(al => al.OperatorId)
-               .IsUnicode(true)
-               .HasMaxLength(512)
                .IsRequired(false)
                .HasComment("The identity of the user who change entity.");
 

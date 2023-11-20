@@ -4,7 +4,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Conventions.Infrastructure;
 
 namespace Ling.EntityFrameworkCore.Audit.Internal;
 
-internal class AuditIncludeAttributeConvention : EntityTypeAttributeConventionBase<AuditIncludeAttribute>
+internal class AuditIncludeAttributeConvention :
+#if NET8_0_OR_GREATER
+    TypeAttributeConventionBase<AuditIncludeAttribute>
+#else
+    EntityTypeAttributeConventionBase<AuditIncludeAttribute>
+#endif
 {
     public AuditIncludeAttributeConvention(ProviderConventionSetBuilderDependencies dependencies) : base(dependencies)
     {

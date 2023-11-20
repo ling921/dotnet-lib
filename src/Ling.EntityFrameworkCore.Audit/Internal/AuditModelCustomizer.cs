@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Ling.EntityFrameworkCore.Audit.Internal;
 
-internal sealed class AuditModelCustomizer : ModelCustomizer
+internal sealed class AuditModelCustomizer<TUserKey> : ModelCustomizer
 {
     private readonly IDbContextOptions _options;
     private readonly ILogger _logger;
@@ -19,7 +19,7 @@ internal sealed class AuditModelCustomizer : ModelCustomizer
         ILoggerFactory loggerFactory) : base(dependencies)
     {
         _options = options;
-        _logger = loggerFactory.CreateLogger<AuditModelCustomizer>();
+        _logger = loggerFactory.CreateLogger<AuditModelCustomizer<TUserKey>>();
     }
 
     /// <inheritdoc/>
@@ -40,7 +40,7 @@ internal sealed class AuditModelCustomizer : ModelCustomizer
             action.Invoke(auditOptions);
         }
 
-        modelBuilder.ApplyConfiguration(new AuditLogTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new AuditLogTypeConfiguration<TUserKey>());
         modelBuilder.ApplyConfiguration(new AuditLogDetailTypeConfiguration());
 
         modelBuilder.ConfigureAuditEntities(auditOptions.Comments);

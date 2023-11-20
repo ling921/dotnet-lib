@@ -1,5 +1,5 @@
 ﻿<Project>
-  <PropertyGroup>
+  <!--<PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <NoWarn>$(NoWarn);NU1507</NoWarn>
   </PropertyGroup>
@@ -30,5 +30,5 @@
     <PackageVersion Include="Microsoft.Extensions.Http" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
-  </ItemGroup>
+  </ItemGroup>-->
 </Project>
