@@ -9,6 +9,6 @@ internal static class StringHelper
         Debug.Assert(numIndentations >= 1);
         Debug.Assert(spacePerIndentation >= 1);
 
-        return source.Replace(Environment.NewLine, Environment.NewLine + new string(' ', spacePerIndentation * numIndentations));
+        return source.Replace("\n", "\n" + new string(' ', spacePerIndentation * numIndentations));
     }
 }

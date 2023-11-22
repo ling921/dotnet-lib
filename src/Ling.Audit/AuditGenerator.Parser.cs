@@ -28,9 +28,9 @@ public sealed partial class AuditGenerator
 
         private static readonly DiagnosticDescriptor UnknownUserKeyType = new(
             id: "LDEFCG001",
-            title: GeneratorConstants.UnknownUserKeyTypeTitle,
-            messageFormat: GeneratorConstants.UnknownUserKeyTypeMessageFormat,
-            category: GeneratorConstants.AuditSourceGenerationName,
+            title: AuditDefaults.UnknownUserKeyTypeTitle,
+            messageFormat: AuditDefaults.UnknownUserKeyTypeMessageFormat,
+            category: AuditDefaults.SourceGenerationName,
             defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true);
 
@@ -56,9 +56,9 @@ public sealed partial class AuditGenerator
 
         private static DiagnosticDescriptor ContextClassesMustBePartial { get; } = new DiagnosticDescriptor(
             id: "LDEFCG002",
-            title: GeneratorConstants.ContextClassesMustBePartialTitle,
-            messageFormat: GeneratorConstants.ContextClassesMustBePartialMessageFormat,
-            category: GeneratorConstants.AuditSourceGenerationName,
+            title: AuditDefaults.ContextClassesMustBePartialTitle,
+            messageFormat: AuditDefaults.ContextClassesMustBePartialMessageFormat,
+            category: AuditDefaults.SourceGenerationName,
             defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true);
 
@@ -357,11 +357,11 @@ public sealed partial class AuditGenerator
             return new PropertyGenerationSpec
             {
                 Location = location,
-                ClrName = "CreationTime",
+                ClrName = AuditDefaults.CreationTimeClrName,
                 IsValueType = true,
                 IsNullable = false,
                 Order = 991,
-                Comment = GeneratorConstants.CreationTimeComment,
+                Comment = AuditDefaults.CreationTimeComment,
                 DeclaringTypeRef = DateTimeOffsetTypeRef
             };
         }
@@ -373,12 +373,12 @@ public sealed partial class AuditGenerator
             return new PropertyGenerationSpec
             {
                 Location = location,
-                ClrName = "CreatorId",
+                ClrName = AuditDefaults.CreatorIdClrName,
                 IsValueType = propertyType!.IsValueType,
                 IsNullable = true,
                 IsUerKeyType = true,
                 Order = 992,
-                Comment = GeneratorConstants.CreatorIdComment,
+                Comment = AuditDefaults.CreatorIdComment,
                 DeclaringTypeRef = propertyType.GetCompilableName()
             };
         }
@@ -388,11 +388,11 @@ public sealed partial class AuditGenerator
             return new PropertyGenerationSpec
             {
                 Location = location,
-                ClrName = "LastModificationTime",
+                ClrName = AuditDefaults.LastModificationTimeClrName,
                 IsValueType = true,
                 IsNullable = true,
                 Order = 994,
-                Comment = GeneratorConstants.LastModificationTimeComment,
+                Comment = AuditDefaults.LastModificationTimeComment,
                 DeclaringTypeRef = DateTimeOffsetTypeRef
             };
         }
@@ -404,12 +404,12 @@ public sealed partial class AuditGenerator
             return new PropertyGenerationSpec
             {
                 Location = location,
-                ClrName = "LastModifierId",
+                ClrName = AuditDefaults.LastModifierIdClrName,
                 IsValueType = propertyType!.IsValueType,
                 IsNullable = true,
                 IsUerKeyType = true,
                 Order = 995,
-                Comment = GeneratorConstants.LastModifierIdComment,
+                Comment = AuditDefaults.LastModifierIdComment,
                 DeclaringTypeRef = propertyType.GetCompilableName()
             };
         }
@@ -419,11 +419,11 @@ public sealed partial class AuditGenerator
             return new PropertyGenerationSpec
             {
                 Location = location,
-                ClrName = "IsDeleted",
+                ClrName = AuditDefaults.IsDeletedClrName,
                 IsValueType = true,
                 IsNullable = false,
                 Order = 997,
-                Comment = GeneratorConstants.IsDeletedComment,
+                Comment = AuditDefaults.IsDeletedComment,
                 DeclaringTypeRef = BooleanTypeRef
             };
         }
@@ -433,11 +433,11 @@ public sealed partial class AuditGenerator
             return new PropertyGenerationSpec
             {
                 Location = location,
-                ClrName = "DeletionTime",
+                ClrName = AuditDefaults.DeletionTimeClrName,
                 IsValueType = true,
                 IsNullable = true,
                 Order = 998,
-                Comment = GeneratorConstants.DeletionTimeComment,
+                Comment = AuditDefaults.DeletionTimeComment,
                 DeclaringTypeRef = DateTimeOffsetTypeRef
             };
         }
@@ -449,12 +449,12 @@ public sealed partial class AuditGenerator
             return new PropertyGenerationSpec
             {
                 Location = location,
-                ClrName = "DeleterId",
+                ClrName = AuditDefaults.DeleterIdClrName,
                 IsValueType = propertyType!.IsValueType,
                 IsNullable = true,
                 IsUerKeyType = true,
                 Order = 999,
-                Comment = GeneratorConstants.DeleterIdComment,
+                Comment = AuditDefaults.DeleterIdComment,
                 DeclaringTypeRef = propertyType.GetCompilableName()
             };
         }

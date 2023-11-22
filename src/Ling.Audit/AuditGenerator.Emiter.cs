@@ -15,17 +15,17 @@ public sealed partial class AuditGenerator
 
         private static readonly DiagnosticDescriptor UserKeyTypeConflict = new(
             id: "LDEFCG003",
-            title: GeneratorConstants.ConflictUserKeyTypeNameTitle,
-            messageFormat: GeneratorConstants.ConflictUserKeyTypeNameMessageFormat,
-            category: GeneratorConstants.AuditSourceGenerationName,
+            title: AuditDefaults.ConflictUserKeyTypeNameTitle,
+            messageFormat: AuditDefaults.ConflictUserKeyTypeNameMessageFormat,
+            category: AuditDefaults.SourceGenerationName,
             defaultSeverity: DiagnosticSeverity.Error,
             isEnabledByDefault: true);
 
         private static readonly DiagnosticDescriptor DuplicateSourceName = new(
             id: "LDEFCG004",
-            title: GeneratorConstants.DuplicateSourceNameTitle,
-            messageFormat: GeneratorConstants.DuplicateSourceNameMessageFormat,
-            category: GeneratorConstants.AuditSourceGenerationName,
+            title: AuditDefaults.DuplicateSourceNameTitle,
+            messageFormat: AuditDefaults.DuplicateSourceNameMessageFormat,
+            category: AuditDefaults.SourceGenerationName,
             defaultSeverity: DiagnosticSeverity.Error,
             isEnabledByDefault: true);
 

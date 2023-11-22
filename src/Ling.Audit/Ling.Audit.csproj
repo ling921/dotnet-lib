@@ -2,11 +2,12 @@
 
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
+    <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
 	</PropertyGroup>
 
 	<PropertyGroup>
 		<PackageId>Ling.Audit</PackageId>
-		<PackageVersion>1.1.0-beta-202311201756</PackageVersion>
+		<PackageVersion>1.1.0-beta-202311221357</PackageVersion>
 		<Description>A source generator for audit properties.</Description>
 		<PackageTags>ling;audit;sourcegenerator;</PackageTags>
 		<PackageReleaseNotes>Please Check https://github.com/ling921/ling-audit/blob/master/src/Ling.Audit/RELEASE.md</PackageReleaseNotes>
@@ -14,7 +15,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.4" PrivateAssets="all" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" PrivateAssets="all" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.8.0" PrivateAssets="all" />
 		<ProjectReference Include="..\Ling.Audit.Abstractions\Ling.Audit.Abstractions.csproj" PrivateAssets="all" />
 	</ItemGroup>
 
