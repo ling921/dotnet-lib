@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace Ling.EntityFrameworkCore.Audit.Extensions;
+namespace Ling.EntityFrameworkCore.Audit.Internal.Extensions;
 
 internal static class EntityEntryExtensions
 {

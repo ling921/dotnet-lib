@@ -6,7 +6,7 @@
 
 	<PropertyGroup>
 		<PackageId>Ling.EntityFrameworkCore.Audit</PackageId>
-		<PackageVersion>1.1.0-beta-202311221357</PackageVersion>
+		<PackageVersion>1.1.0-beta-202311221827</PackageVersion>
 		<Description>An extension library that can automatically record entity changes of Microsoft.EntityFrameworkCore.</Description>
 		<PackageTags>ling;efcore;entityframeworkcore;audit;</PackageTags>
 		<PackageReleaseNotes>Please Check https://github.com/ling921/dotnet-lib/blob/master/src/Ling.EntityFrameworkCore.Audit/RELEASE.md</PackageReleaseNotes>

@@ -91,12 +91,13 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
     private static IEnumerable<AuditEntry> AuditEntries(DbContext context, AuditOptions options, IAuditUserProvider<TUserKey> userProvider)
     {
         var now = DateTimeOffset.Now;
-        var isDefault = EqualityComparer<TUserKey>.Default.Equals(userProvider.Id, default);
+        var isUserIdDefaultValue = EqualityComparer<TUserKey>.Default.Equals(userProvider.Id, default);
         foreach (var entityEntry in context.ChangeTracker.Entries())
         {
             var entityType = entityEntry.Metadata.ClrType;
             var metadata = entityEntry.Metadata.GetAuditMetadata();
             var eventType = EventType.None;
+            var userId = isUserIdDefaultValue ? null : userProvider.Id.ConvertToTargetType(metadata.UserKeyType);
 
             if (IsSameTypeIgnoreNullable(metadata.UserKeyType, typeof(TUserKey)))
             {
@@ -115,11 +116,11 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
                     {
                         if (!options.AllowAnonymousDelete &&
                             !metadata.IsAllowed(AuditOperate.Delete) &&
-                            isDefault)
+                            isUserIdDefaultValue)
                         {
                             throw new InvalidOperationException($"Anonymous deletion of {entityType.GetFriendlyName()} is not allowed.");
                         }
-                        entityEntry.Property(Constants.DeleterId).CurrentValue = userProvider.Id;
+                        entityEntry.Property(Constants.DeleterId).CurrentValue = userId;
                     }
 
                     if (metadata.HasIsDeleted)
@@ -143,12 +144,12 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
                     {
                         if (!options.AllowAnonymousModify &&
                             !metadata.IsAllowed(AuditOperate.Update) &&
-                            isDefault)
+                            isUserIdDefaultValue)
                         {
                             throw new InvalidOperationException($"Anonymous modification of {entityType.GetFriendlyName()} is not allowed.");
                         }
 
-                        entityEntry.Property(Constants.LastModifierId).CurrentValue = userProvider.Id;
+                        entityEntry.Property(Constants.LastModifierId).CurrentValue = userId;
                     }
                     eventType = GetModifiedType(entityEntry, metadata);
                     break;
@@ -162,11 +163,11 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
                     {
                         if (!options.AllowAnonymousCreate &&
                             !metadata.IsAllowed(AuditOperate.Create) &&
-                            isDefault)
+                            isUserIdDefaultValue)
                         {
                             throw new InvalidOperationException($"Anonymous creation of {entityType.GetFriendlyName()} is not allowed.");
                         }
-                        entityEntry.Property(Constants.CreatorId).CurrentValue = userProvider.Id;
+                        entityEntry.Property(Constants.CreatorId).CurrentValue = userId;
                     }
                     eventType = EventType.Create;
                     break;
