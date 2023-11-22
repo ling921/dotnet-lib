@@ -1,4 +1,5 @@
 ﻿using Ling.EntityFrameworkCore.Audit.Extensions;
+using Ling.EntityFrameworkCore.Audit.Internal.Extensions;
 using Ling.EntityFrameworkCore.Audit.Internal.Models;
 using Ling.EntityFrameworkCore.Audit.Models;
 using Ling.EntityFrameworkCore.Extensions;
@@ -7,7 +8,6 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
@@ -28,10 +28,10 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
         if (context is not null)
         {
             var userProvider = context.GetService<IAuditUserProvider<TUserKey>>();
-            var options = context.GetService<IOptionsSnapshot<AuditOptions>>().Value;
+            var options = context.GetAuditOptions();
             var entries = AuditEntries(context, options, userProvider).ToList();
 
-            if (AppContext.TryGetSwitch(AuditConstants.DisabledSwitchKey, out var disabled) || !disabled)
+            if (AppContext.TryGetSwitch(AuditDefaults.DisabledSwitchKey, out var disabled) || !disabled)
             {
                 s_contextEntries.TryAdd(context.ContextId, entries);
             }
@@ -47,7 +47,7 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
         cancellationToken = default)
     {
         var context = eventData.Context;
-        AppContext.TryGetSwitch(AuditConstants.DisabledSwitchKey, out var disabled);
+        AppContext.TryGetSwitch(AuditDefaults.DisabledSwitchKey, out var disabled);
         if (context is not null && !disabled)
         {
             var logger = context.GetService<ILoggerFactory>().CreateLogger(context.GetType());
@@ -58,7 +58,7 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
 
             var userProvider = context.GetService<IAuditUserProvider<TUserKey>>();
             var logs = entryInfo
-                .ConvertAll(i => new AuditLog<TUserKey>
+                .ConvertAll(i => new AuditEntityLog<TUserKey>
                 {
                     Schema = i.Schema,
                     Table = i.Table,
@@ -68,7 +68,7 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
                     EventTime = DateTimeOffset.Now,
                     OperatorId = userProvider.Id,
                     OperatorName = userProvider.Name,
-                    Details = i.Properties.ConvertAll(ii => new AuditLogDetail
+                    Details = i.Properties.ConvertAll(ii => new AuditFieldLog
                     {
                         PropertyName = i.EntityType + '.' + ii.PropertyName,
                         OriginalValue = GetStringValue(ii.OriginalValue),

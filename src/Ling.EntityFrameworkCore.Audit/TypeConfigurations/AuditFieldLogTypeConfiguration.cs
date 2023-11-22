@@ -4,25 +4,26 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Ling.EntityFrameworkCore.Audit.TypeConfigurations;
 
-internal sealed class AuditLogDetailTypeConfiguration : IEntityTypeConfiguration<AuditLogDetail>
+internal sealed class AuditFieldLogTypeConfiguration : IEntityTypeConfiguration<AuditFieldLog>
 {
-    public void Configure(EntityTypeBuilder<AuditLogDetail> builder)
+    public void Configure(EntityTypeBuilder<AuditFieldLog> builder)
     {
 #if NET7_0_OR_GREATER
-        builder.ToTable("AuditLogDetails", t => t.HasComment("A table to store entity changes."))
+        builder.ToTable("AuditLogDetails", t => t.HasComment("A table to record entity's fields changes."))
                .HasKey(al => al.Id);
 #else
-        builder.ToTable("AuditLogDetails")
-               .HasComment("A table to store entity changes.");
+        builder.ToTable(AuditDefaults.EntityFieldChangeAuditLogTableName)
+               .HasComment("A table to record entity's fields changes.");
 
         builder.HasKey(al => al.Id);
 #endif
 
         builder.Property(al => al.Id)
-               .HasComment("The primary key of changed entity.");
+               .ValueGeneratedOnAdd()
+               .HasComment("The primary key.");
 
-        builder.Property(al => al.AuditLogId)
-               .HasComment("The primary key of the AuditLog that the detail belongs to.");
+        builder.Property(al => al.EntityLogId)
+               .HasComment("The entity-change-log primary key.");
 
         builder.Property(al => al.PropertyName)
                .IsUnicode(false)

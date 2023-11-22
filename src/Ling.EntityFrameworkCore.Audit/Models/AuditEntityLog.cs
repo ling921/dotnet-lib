@@ -3,9 +3,9 @@
 namespace Ling.EntityFrameworkCore.Audit.Models;
 
 /// <summary>
-/// Represents the audit log.
+/// Represents the audit log for entities.
 /// </summary>
-public class AuditLog<TUserKey>
+public class AuditEntityLog<TUserKey>
 {
     /// <summary>
     /// Gets or sets the primary key.
@@ -55,5 +55,5 @@ public class AuditLog<TUserKey>
     /// <summary>
     /// Gets or sets the details of this audit log.
     /// </summary>
-    public virtual ICollection<AuditLogDetail> Details { get; set; } = new List<AuditLogDetail>();
+    public virtual ICollection<AuditFieldLog> Details { get; set; } = new List<AuditFieldLog>();
 }
