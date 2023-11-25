@@ -90,7 +90,7 @@ public static class ModelBuilderExtensions
     /// <summary>
     /// Gets whether the current program is running at design time.
     /// </summary>
-    internal static bool IsDesignTime => Process.GetCurrentProcess().ProcessName == "dotnet";
+    internal static bool IsDesignTime => System.Reflection.Assembly.GetEntryAssembly() is null;
 
     /// <summary>
     /// Configure properties of auditable entities.
