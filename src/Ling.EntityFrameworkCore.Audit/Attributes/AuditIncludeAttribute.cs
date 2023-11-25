@@ -3,7 +3,7 @@
 /// <summary>
 /// Indicates that the entity is automatically audited.
 /// </summary>
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
 public class AuditIncludeAttribute : Attribute
 {
     /// <summary>

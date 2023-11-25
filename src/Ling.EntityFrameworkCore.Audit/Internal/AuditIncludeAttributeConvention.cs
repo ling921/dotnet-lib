@@ -20,6 +20,6 @@ internal class AuditIncludeAttributeConvention :
         AuditIncludeAttribute attribute,
         IConventionContext<IConventionEntityTypeBuilder> context)
     {
-        entityTypeBuilder.Metadata.SetAnnotation(AuditAnnotationNames.Include, true);
+        entityTypeBuilder.Metadata.SetAnnotation(Constants.IncludeAnnotationName, true);
     }
 }

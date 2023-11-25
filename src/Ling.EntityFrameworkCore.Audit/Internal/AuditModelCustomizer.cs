@@ -30,6 +30,8 @@ internal sealed class AuditModelCustomizer<TUserKey> : ModelCustomizer
 
         modelBuilder.ConfigureAuditableEntities(auditOptions.Comments);
 
+        modelBuilder.SetupSoftDeleteQueryFilter();
+
         _logger.LogInformation("Complete the audit entity model configuration.");
     }
 }

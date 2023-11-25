@@ -52,7 +52,7 @@ public static class ModelBuilderExtensions
     {
         ArgumentNullException.ThrowIfNull(entityTypeBuilder);
 
-        entityTypeBuilder.Metadata.SetAnnotation(AuditAnnotationNames.Include, true);
+        entityTypeBuilder.Metadata.SetAnnotation(Constants.IncludeAnnotationName, true);
         entityTypeBuilder.Metadata.SetAuditMetadata(new AuditMetadata { AllowAnonymousOperate = allowAnonymousOperate });
 
         return entityTypeBuilder;
@@ -74,7 +74,7 @@ public static class ModelBuilderExtensions
     {
         ArgumentNullException.ThrowIfNull(propertyBuilder);
 
-        propertyBuilder.Metadata.SetAnnotation(AuditAnnotationNames.Include, enabled);
+        propertyBuilder.Metadata.SetAnnotation(Constants.IncludeAnnotationName, enabled);
         return propertyBuilder;
     }
 
@@ -87,10 +87,14 @@ public static class ModelBuilderExtensions
 
     #region Internal Methods
 
+#if NET6_0
+
     /// <summary>
     /// Gets whether the current program is running at design time.
     /// </summary>
-    internal static bool IsDesignTime => System.Reflection.Assembly.GetEntryAssembly() is null;
+    internal static bool IsDesignTime => Path.GetFileName(Environment.GetCommandLineArgs().FirstOrDefault()) == "ef.dll";
+
+#endif
 
     /// <summary>
     /// Configure properties of auditable entities.
@@ -193,83 +197,25 @@ public static class ModelBuilderExtensions
 
             entityType.SetAuditMetadata(auditMetadata);
 
+#if NET6_0
             if (IsDesignTime)
+#else
+            if (EF.IsDesignTime)
+#endif
             {
-                entityType.RemoveAnnotation(AuditAnnotationNames.Metadata);
+                Debug.WriteLine("Currently running in design time.");
+                entityType.RemoveAnnotation(Constants.MetadataAnnotationName);
             }
         }
 
         return userKeyType;
     }
 
-    //internal static void ConfigureAuditLogEntities(this ModelBuilder builder, Type? userKeyType)
-    //{
-    //    var type = userKeyType is null
-    //        ? typeof(string)
-    //        : userKeyType.IsValueType
-    //        ? typeof(Nullable<>).MakeGenericType(userKeyType)
-    //        : userKeyType;
-
-    //    builder.SharedTypeEntity<Dictionary<string, object?>>(
-    //        AuditConfiguration.EntityChangeAuditLogTableName,
-    //        b =>
-    //        {
-    //            b.ToTable(AuditConfiguration.EntityChangeAuditLogTableName)
-    //                .HasComment("A table that stores entity changes.");
-    //            b.HasKey("Id");
-    //            b.Property<long>("Id")
-    //                .ValueGeneratedOnAdd()
-    //                .HasComment("The primary key for this entity.");
-    //            b.Property<string?>("Schema")
-    //                .IsUnicode(false)
-    //                .HasMaxLength(64)
-    //                .HasComment("The database schema name.");
-    //            b.Property<string?>("Table")
-    //                .IsUnicode(false)
-    //                .HasMaxLength(128)
-    //                .HasComment("The table name.");
-    //            b.Property<string>("PrimaryKey")
-    //                .IsUnicode(false)
-    //                .HasMaxLength(128)
-    //                .HasComment("The primary key of changed entity.");
-    //            b.Property<string>("EntityType")
-    //                .IsUnicode(false)
-    //                .HasMaxLength(64)
-    //                .HasComment("The type of changed entity.");
-    //            b.Property<EventType>("EventType")
-    //                .IsUnicode(false)
-    //                .HasMaxLength(16)
-    //                .HasConversion<string>()
-    //                .HasComment("The type of audit event.");
-    //            b.Property<DateTimeOffset>("EventTime")
-    //                .HasComment("The time the audit event occurred.");
-    //            b.Property(type, "OperatorId")
-    //                .IsRequired(false)
-    //                .HasComment("The identity of the user who change entity.");
-    //            b.Property<string?>("OperatorName")
-    //                .IsUnicode(true)
-    //                .HasMaxLength(512)
-    //                .IsRequired(false)
-    //                .HasComment("The name of the user who change entity.");
-    //            b.HasMany(AuditConfiguration.EntityFieldChangeAuditLogTableName)
-    //             .WithOne
-    //        }
-    //    );
-
-    //    builder.SharedTypeEntity<Dictionary<string, object?>>(
-    //        AuditConfiguration.EntityFieldChangeAuditLogTableName,
-    //        b =>
-    //        {
-
-    //        }
-    //    );
-    //}
-
     internal static bool GetAuditInclude(this IReadOnlyAnnotatable annotatable)
     {
         ArgumentNullException.ThrowIfNull(annotatable);
 
-        var value = annotatable.FindAnnotation(AuditAnnotationNames.Include)?.Value;
+        var value = annotatable.FindAnnotation(Constants.IncludeAnnotationName)?.Value;
         return annotatable switch
         {
             IEntityType => value is not null && (bool)value, // Entity auditable defaults to false
@@ -283,14 +229,14 @@ public static class ModelBuilderExtensions
         ArgumentNullException.ThrowIfNull(entityType);
         ArgumentNullException.ThrowIfNull(metadata);
 
-        if (entityType.FindAnnotation(AuditAnnotationNames.Metadata)?.Value is AuditMetadata original)
+        if (entityType.FindAnnotation(Constants.MetadataAnnotationName)?.Value is AuditMetadata original)
         {
             original.Append(metadata);
-            entityType.SetAnnotation(AuditAnnotationNames.Metadata, original);
+            entityType.SetAnnotation(Constants.MetadataAnnotationName, original);
         }
         else
         {
-            entityType.SetAnnotation(AuditAnnotationNames.Metadata, metadata);
+            entityType.SetAnnotation(Constants.MetadataAnnotationName, metadata);
         }
     }
 
@@ -298,7 +244,7 @@ public static class ModelBuilderExtensions
     {
         ArgumentNullException.ThrowIfNull(entityType);
 
-        return entityType.FindAnnotation(AuditAnnotationNames.Metadata)?.Value is AuditMetadata metadata
+        return entityType.FindAnnotation(Constants.MetadataAnnotationName)?.Value is AuditMetadata metadata
             ? metadata
             : new AuditMetadata();
     }

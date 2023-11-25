@@ -4,12 +4,12 @@ using Microsoft.Extensions.Configuration;
 
 namespace Ling.EntityFrameworkCore.Audit.Internal.Extensions;
 
-internal static class AuditExtensions
+internal static class DbContextExtensions
 {
     internal static AuditOptions GetAuditOptions(this DbContext context)
     {
         var configuration = context.GetService<IConfiguration>();
-        var options = configuration.GetSection("Audit").Get<AuditOptions>() ?? new();
+        var options = configuration.GetSection(AuditDefaults.ConfigurationKey).Get<AuditOptions>() ?? new();
 
         var extension = context.GetService<IDbContextOptions>()
             .Extensions

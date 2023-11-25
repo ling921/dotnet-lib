@@ -2,16 +2,19 @@
 
 internal static class Constants
 {
-    public const string Id = "Id";
-    public const string CreationTime = "CreationTime";
-    public const string CreatorId = "CreatorId";
-    public const string LastModificationTime = "LastModificationTime";
-    public const string LastModifierId = "LastModifierId";
-    public const string IsDeleted = "IsDeleted";
-    public const string DeletionTime = "DeletionTime";
-    public const string DeleterId = "DeleterId";
+    internal const string IncludeAnnotationName = "Ling:Audit:Include";
+    internal const string MetadataAnnotationName = "Ling:Audit:Metadata";
 
-    public static readonly IReadOnlyCollection<string> PropertyNames = new[]
+    internal const string Id = "Id";
+    internal const string CreationTime = "CreationTime";
+    internal const string CreatorId = "CreatorId";
+    internal const string LastModificationTime = "LastModificationTime";
+    internal const string LastModifierId = "LastModifierId";
+    internal const string IsDeleted = "IsDeleted";
+    internal const string DeletionTime = "DeletionTime";
+    internal const string DeleterId = "DeleterId";
+
+    internal static readonly IReadOnlyCollection<string> PropertyNames = new[]
     {
         Id,
         CreationTime,

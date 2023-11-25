@@ -24,4 +24,9 @@ internal static class ReflectionExtensions
 
         return friendlyName;
     }
+
+    internal static bool IsSameTypeIgnoreNullableTo(this Type? a, Type? b)
+        => a is not null
+        && b is not null
+        && (Nullable.GetUnderlyingType(a) ?? a) == (Nullable.GetUnderlyingType(b) ?? b);
 }

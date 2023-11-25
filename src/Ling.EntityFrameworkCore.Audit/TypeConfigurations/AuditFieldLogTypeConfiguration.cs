@@ -9,7 +9,7 @@ internal sealed class AuditFieldLogTypeConfiguration : IEntityTypeConfiguration<
     public void Configure(EntityTypeBuilder<AuditFieldLog> builder)
     {
 #if NET7_0_OR_GREATER
-        builder.ToTable("AuditLogDetails", t => t.HasComment("A table to record entity's fields changes."))
+        builder.ToTable(AuditDefaults.EntityFieldChangeAuditLogTableName, t => t.HasComment("A table to record entity's fields changes."))
                .HasKey(al => al.Id);
 #else
         builder.ToTable(AuditDefaults.EntityFieldChangeAuditLogTableName)

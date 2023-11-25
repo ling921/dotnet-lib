@@ -1,8 +1,4 @@
-﻿#if NET7_0_OR_GREATER
-using System.ComponentModel;
-#endif
-
-namespace Ling.EntityFrameworkCore.Audit;
+﻿namespace Ling.EntityFrameworkCore.Audit;
 
 /// <summary>
 /// Interface for audit user information.

@@ -28,7 +28,7 @@ internal sealed class AuditMetadata
         }
     }
 
-    public bool IsAllowed(AuditOperate operate)
+    public bool IsAllowedAnonymousOperate(AuditOperate operate)
     {
         return AllowAnonymousOperate.HasFlag(operate);
     }

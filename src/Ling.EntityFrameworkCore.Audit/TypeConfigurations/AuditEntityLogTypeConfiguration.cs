@@ -9,10 +9,10 @@ internal sealed class AuditEntityLogTypeConfiguration<TUserKey> : IEntityTypeCon
     public void Configure(EntityTypeBuilder<AuditEntityLog<TUserKey>> builder)
     {
 #if NET7_0_OR_GREATER
-        builder.ToTable("AuditLogs", t => t.HasComment("A table to record entities changes."))
+        builder.ToTable(AuditDefaults.EntityChangeAuditLogTableName, t => t.HasComment("A table to record entities changes."))
                .HasKey(al => al.Id);
 #else
-        builder.ToTable("AuditLogs")
+        builder.ToTable(AuditDefaults.EntityChangeAuditLogTableName)
                .HasComment("A table to record entities changes.");
 
         builder.HasKey(al => al.Id);
