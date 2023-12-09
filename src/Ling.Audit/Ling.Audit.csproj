@@ -7,7 +7,7 @@
 
 	<PropertyGroup>
 		<PackageId>Ling.Audit</PackageId>
-		<PackageVersion>1.1.0-beta-202311221357</PackageVersion>
+		<PackageVersion>1.1.0-beta-202312091555</PackageVersion>
 		<Description>A source generator for audit properties.</Description>
 		<PackageTags>ling;audit;sourcegenerator;</PackageTags>
 		<PackageReleaseNotes>Please Check https://github.com/ling921/ling-audit/blob/master/src/Ling.Audit/RELEASE.md</PackageReleaseNotes>

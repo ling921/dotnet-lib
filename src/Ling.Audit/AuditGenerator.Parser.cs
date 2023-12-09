@@ -1,11 +1,11 @@
-﻿using Ling.EntityFrameworkCore.Audit.Generator;
+﻿using Ling.Audit.Extensions;
+using Ling.EntityFrameworkCore.Audit.Generator;
 using Ling.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Text;
 
 namespace Ling.Audit.SourceGeneration;
 
@@ -26,14 +26,6 @@ public sealed partial class AuditGenerator
         private const string DateTimeOffsetTypeRef = "global::System.DateTimeOffset";
         private const string BooleanTypeRef = "global::System.Boolean";
 
-        private static readonly DiagnosticDescriptor UnknownUserKeyType = new(
-            id: "LDEFCG001",
-            title: AuditDefaults.UnknownUserKeyTypeTitle,
-            messageFormat: AuditDefaults.UnknownUserKeyTypeMessageFormat,
-            category: AuditDefaults.SourceGenerationName,
-            defaultSeverity: DiagnosticSeverity.Warning,
-            isEnabledByDefault: true);
-
         private readonly Compilation _compilation;
 
         private readonly AuditSourceGenerationContext _sourceGenerationContext;
@@ -41,26 +33,12 @@ public sealed partial class AuditGenerator
         private readonly MetadataLoadContextInternal _metadataLoadContext;
 
         private readonly Type? _hasCreationTimeInterfaceType;
-
         private readonly Type? _hasCreatorInterfaceType;
-
         private readonly Type? _hasModificationTimeInterfaceType;
-
         private readonly Type? _hasModifierInterfaceType;
-
         private readonly Type? _hasSoftDeleteInterfaceType;
-
         private readonly Type? _hasDeletionTimeInterfaceType;
-
         private readonly Type? _hasDeleterInterfaceType;
-
-        private static DiagnosticDescriptor ContextClassesMustBePartial { get; } = new DiagnosticDescriptor(
-            id: "LDEFCG002",
-            title: AuditDefaults.ContextClassesMustBePartialTitle,
-            messageFormat: AuditDefaults.ContextClassesMustBePartialMessageFormat,
-            category: AuditDefaults.SourceGenerationName,
-            defaultSeverity: DiagnosticSeverity.Warning,
-            isEnabledByDefault: true);
 
         #endregion Private Fields
 
@@ -98,8 +76,7 @@ public sealed partial class AuditGenerator
             cancellationToken.ThrowIfCancellationRequested();
 
             return node is ClassDeclarationSyntax { BaseList.Types.Count: > 0 } cds &&
-                !cds.Modifiers.Any(st => st.IsKind(SyntaxKind.StaticKeyword)) &&
-                cds.Modifiers.Any(st => st.IsKind(SyntaxKind.PartialKeyword));
+                !cds.Modifiers.Any(st => st.IsKind(SyntaxKind.StaticKeyword));
         }
 
         internal static ClassDeclarationSyntax? GetSemanticTargetForGeneration(GeneratorSyntaxContext context, CancellationToken cancellationToken)
@@ -127,66 +104,83 @@ public sealed partial class AuditGenerator
 
                     var contextLocation = contextTypeSymbol!.Locations.FirstOrDefault() ?? Location.None;
 
-                    var unimplementedInterfaceTypeSymbols = GetUnimplementedInterfaceTypeSymbols(contextTypeSymbol);
+                    var classDeclarationList = contextTypeSymbol.GetTypeDeclarationList();
+                    if (classDeclarationList.Count == 0)
+                    {
+                        _sourceGenerationContext.ReportDiagnostic(Diagnostics.InvalidTypeDeclareDeclaration(contextLocation));
+                        continue;
+                    }
+
+                    var unimplementedInterfaceTypeSymbols = contextTypeSymbol.GetUnimplementedInterfaceTypeSymbols();
                     if (!unimplementedInterfaceTypeSymbols.Any())
                     {
                         continue;
                     }
 
                     var baseTypeLocations = classDeclarationSyntax.BaseList!.Types
-                        .Select(t => new { DeclarationName = t.ToFullString().Trim(), Location = t.GetLocation() });
+                        .Select(t => new
+                        {
+                            BaseTypeSymbol = compilationSemanticModel.GetTypeInfo(t.Type, cancellationToken).Type as INamedTypeSymbol,
+                            Location = t.GetLocation()
+                        });
 
                     var propertyGenSpecList = new List<PropertyGenerationSpec>();
 
-                    foreach (var (interfaceTypeSymbol, declarationName) in unimplementedInterfaceTypeSymbols)
+                    foreach (var (interfaceTypeSymbol, innerInterfaceTypeSymbols) in unimplementedInterfaceTypeSymbols)
                     {
                         var interfaceType = interfaceTypeSymbol.AsType(_metadataLoadContext)!;
-                        var location = baseTypeLocations.FirstOrDefault(i => i.DeclarationName == declarationName)?.Location ?? Location.None;
-                        if (_hasCreationTimeInterfaceType!.Equals(interfaceType))
+                        var location = baseTypeLocations.FirstOrDefault(i => interfaceTypeSymbol.IsEqualsTo(i.BaseTypeSymbol))?.Location ?? Location.None;
+
+                        foreach (var innerInterfaceTypeSymbol in innerInterfaceTypeSymbols)
                         {
-                            propertyGenSpecList.Add(GetCreationTimePropertySpec(location));
-                        }
-                        else if (interfaceType.GetCompatibleGenericBaseClass(_hasCreatorInterfaceType!) != null)
-                        {
-                            var userKeyType = interfaceType.GetGenericArguments().FirstOrDefault();
-                            if (userKeyType is null)
+                            var innerInterfaceType = innerInterfaceTypeSymbol.AsType(_metadataLoadContext)!;
+
+                            if (_hasCreationTimeInterfaceType!.Equals(innerInterfaceType))
                             {
-                                _sourceGenerationContext.ReportDiagnostic(Diagnostic.Create(UnknownUserKeyType, location, GetClassDeclarationName(interfaceTypeSymbol)));
-                                break;
+                                propertyGenSpecList.Add(GetCreationTimePropertySpec(location, interfaceType));
                             }
-                            propertyGenSpecList.Add(GetCreatorIdPropertySpec(userKeyType, location));
-                        }
-                        else if (_hasModificationTimeInterfaceType!.Equals(interfaceType))
-                        {
-                            propertyGenSpecList.Add(GetLastModificationTimePropertySpec(location));
-                        }
-                        else if (interfaceType.GetCompatibleGenericBaseClass(_hasModifierInterfaceType!) != null)
-                        {
-                            var userKeyType = interfaceType.GetGenericArguments().FirstOrDefault();
-                            if (userKeyType is null)
+                            else if (innerInterfaceType.GetCompatibleGenericBaseClass(_hasCreatorInterfaceType!) != null)
                             {
-                                _sourceGenerationContext.ReportDiagnostic(Diagnostic.Create(UnknownUserKeyType, location, GetClassDeclarationName(interfaceTypeSymbol)));
-                                break;
+                                var userKeyType = innerInterfaceType.GetGenericArguments().FirstOrDefault();
+                                if (userKeyType is null)
+                                {
+                                    _sourceGenerationContext.ReportDiagnostic(Diagnostics.UnknownUserKeyType(location, interfaceType));
+                                    break;
+                                }
+                                propertyGenSpecList.Add(GetCreatorIdPropertySpec(userKeyType, location, interfaceType));
                             }
-                            propertyGenSpecList.Add(GetLastModifierIdPropertySpec(userKeyType, location));
-                        }
-                        else if (_hasSoftDeleteInterfaceType!.Equals(interfaceType))
-                        {
-                            propertyGenSpecList.Add(GetIsDeletedPropertySpec(location));
-                        }
-                        else if (_hasDeletionTimeInterfaceType!.Equals(interfaceType))
-                        {
-                            propertyGenSpecList.Add(GetDeletionTimePropertySpec(location));
-                        }
-                        if (interfaceType.GetCompatibleGenericBaseClass(_hasDeleterInterfaceType!) != null)
-                        {
-                            var userKeyType = interfaceType.GetGenericArguments().FirstOrDefault();
-                            if (userKeyType is null)
+                            else if (_hasModificationTimeInterfaceType!.Equals(innerInterfaceType))
                             {
-                                _sourceGenerationContext.ReportDiagnostic(Diagnostic.Create(UnknownUserKeyType, location, GetClassDeclarationName(interfaceTypeSymbol)));
-                                break;
+                                propertyGenSpecList.Add(GetLastModificationTimePropertySpec(location, interfaceType));
                             }
-                            propertyGenSpecList.Add(GetDeleterIdPropertySpec(userKeyType, location));
+                            else if (innerInterfaceType.GetCompatibleGenericBaseClass(_hasModifierInterfaceType!) != null)
+                            {
+                                var userKeyType = innerInterfaceType.GetGenericArguments().FirstOrDefault();
+                                if (userKeyType is null)
+                                {
+                                    _sourceGenerationContext.ReportDiagnostic(Diagnostics.UnknownUserKeyType(location, interfaceType));
+                                    break;
+                                }
+                                propertyGenSpecList.Add(GetLastModifierIdPropertySpec(userKeyType, location, interfaceType));
+                            }
+                            else if (_hasSoftDeleteInterfaceType!.Equals(innerInterfaceType))
+                            {
+                                propertyGenSpecList.Add(GetIsDeletedPropertySpec(location, interfaceType));
+                            }
+                            else if (_hasDeletionTimeInterfaceType!.Equals(innerInterfaceType))
+                            {
+                                propertyGenSpecList.Add(GetDeletionTimePropertySpec(location, interfaceType));
+                            }
+                            else if (innerInterfaceType.GetCompatibleGenericBaseClass(_hasDeleterInterfaceType!) != null)
+                            {
+                                var userKeyType = innerInterfaceType.GetGenericArguments().FirstOrDefault();
+                                if (userKeyType is null)
+                                {
+                                    _sourceGenerationContext.ReportDiagnostic(Diagnostics.UnknownUserKeyType(location, interfaceType));
+                                    break;
+                                }
+                                propertyGenSpecList.Add(GetDeleterIdPropertySpec(userKeyType, location, interfaceType));
+                            }
                         }
                     }
 
@@ -195,10 +189,20 @@ public sealed partial class AuditGenerator
                         continue;
                     }
 
-                    if (!TryGetClassDeclarationList(contextTypeSymbol, out List<string>? classDeclarationList))
+                    var classDeclaration = classDeclarationList[0];
+                    if (classDeclaration[classDeclaration.Length - 2] != "class")
                     {
-                        // Class or one of its containing types is not partial so we can't add to it.
-                        _sourceGenerationContext.ReportDiagnostic(Diagnostic.Create(ContextClassesMustBePartial, contextLocation, new string[] { contextTypeSymbol.Name }));
+                        _sourceGenerationContext.ReportDiagnostic(Diagnostics.ImplementationMustBeClass(contextLocation));
+                        continue;
+                    }
+                    if (!classDeclaration.Contains("partial"))
+                    {
+                        _sourceGenerationContext.ReportDiagnostic(Diagnostics.ClassMustBePartial(contextLocation));
+                        continue;
+                    }
+                    if (classDeclaration.Contains("record"))
+                    {
+                        _sourceGenerationContext.ReportDiagnostic(Diagnostics.ClassCannotBeRecord(contextLocation));
                         continue;
                     }
 
@@ -207,11 +211,11 @@ public sealed partial class AuditGenerator
                     {
                         Location = contextLocation,
                         ContextType = contextType,
-                        ContextClassDeclarationList = classDeclarationList!,
+                        ContextClassDeclarationList = classDeclarationList.ConvertAll(i => i.Join(" ")),
                         GenerationType = new TypeGenerationSpec
                         {
                             Location = contextLocation,
-                            ClassDeclaration = classDeclarationList![0],
+                            ClassDeclaration = classDeclaration.Join(" "),
                             PropertyGenSpecList = propertyGenSpecList,
                             Type = contextType,
                         }
@@ -226,133 +230,9 @@ public sealed partial class AuditGenerator
 
         #endregion Internal Methods
 
-        #region Private Static Methods
-
-        private static bool TryGetClassDeclarationList(INamedTypeSymbol typeSymbol, out List<string>? classDeclarationList)
-        {
-            INamedTypeSymbol currentSymbol = typeSymbol;
-            classDeclarationList = null;
-
-            while (currentSymbol != null)
-            {
-                if (currentSymbol.DeclaringSyntaxReferences[0].GetSyntax() is ClassDeclarationSyntax classDeclarationSyntax)
-                {
-                    SyntaxTokenList tokenList = classDeclarationSyntax.Modifiers;
-                    int tokenCount = tokenList.Count;
-
-                    var isStatic = false;
-                    var isInterface = false;
-                    var isPartial = false;
-
-                    var declarationElements = new string[tokenCount + 2];
-
-                    for (int i = 0; i < tokenCount; i++)
-                    {
-                        var token = tokenList[i];
-                        declarationElements[i] = token.Text;
-
-                        if (token.IsKind(SyntaxKind.StaticKeyword))
-                        {
-                            isStatic = true;
-                        }
-                        if (token.IsKind(SyntaxKind.InterfaceDeclaration))
-                        {
-                            isInterface = true;
-                        }
-                        if (token.IsKind(SyntaxKind.PartialKeyword))
-                        {
-                            isPartial = true;
-                        }
-                    }
-
-                    if (isStatic || isInterface || !isPartial)
-                    {
-                        classDeclarationList = null;
-                        return false;
-                    }
-
-                    declarationElements[tokenCount] = "class";
-                    declarationElements[tokenCount + 1] = GetClassDeclarationName(currentSymbol);
-
-                    (classDeclarationList ??= new List<string>()).Add(string.Join(" ", declarationElements));
-                }
-
-                currentSymbol = currentSymbol.ContainingType;
-            }
-
-            Debug.Assert(classDeclarationList!.Count > 0);
-            return true;
-        }
-
-        private static string GetClassDeclarationName(INamedTypeSymbol typeSymbol)
-        {
-            if (typeSymbol.TypeArguments.Length == 0)
-            {
-                return typeSymbol.Name;
-            }
-
-            var sb = new StringBuilder();
-
-            sb.Append(typeSymbol.Name);
-            sb.Append('<');
-
-            bool first = true;
-            foreach (ITypeSymbol typeArg in typeSymbol.TypeArguments)
-            {
-                if (!first)
-                {
-                    sb.Append(", ");
-                }
-                else
-                {
-                    first = false;
-                }
-
-                sb.Append(typeArg.Name);
-            }
-
-            sb.Append('>');
-
-            return sb.ToString();
-        }
-
-        private static IEnumerable<(INamedTypeSymbol InterfaceTypeSymbol, string DeclarationName)> GetUnimplementedInterfaceTypeSymbols(INamedTypeSymbol? classTypeSymbol)
-        {
-            if (classTypeSymbol is not null)
-            {
-                var excludes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
-                if (classTypeSymbol.BaseType is not null)
-                {
-                    foreach (var interfaceTypeSymbol in classTypeSymbol.BaseType.AllInterfaces)
-                    {
-                        excludes.Add(interfaceTypeSymbol);
-                    }
-                }
-                foreach (var interfaceTypeSymbol in classTypeSymbol.Interfaces)
-                {
-                    var declarationName = GetClassDeclarationName(interfaceTypeSymbol);
-                    if (!excludes.Contains(interfaceTypeSymbol))
-                    {
-                        yield return (interfaceTypeSymbol, declarationName);
-                        excludes.Add(interfaceTypeSymbol);
-                    }
-                    foreach (var innerInterfaceTypeSymbol in interfaceTypeSymbol.AllInterfaces)
-                    {
-                        if (!excludes.Contains(innerInterfaceTypeSymbol))
-                        {
-                            yield return (innerInterfaceTypeSymbol, declarationName);
-                            excludes.Add(innerInterfaceTypeSymbol);
-                        }
-                    }
-                }
-            }
-        }
-
-        #endregion Private Static Methods
-
         #region PropertyGenerationSpec Methods
 
-        private static PropertyGenerationSpec GetCreationTimePropertySpec(Location location)
+        private static PropertyGenerationSpec GetCreationTimePropertySpec(Location location, Type? implementingType)
         {
             return new PropertyGenerationSpec
             {
@@ -362,11 +242,12 @@ public sealed partial class AuditGenerator
                 IsNullable = false,
                 Order = 991,
                 Comment = AuditDefaults.CreationTimeComment,
-                DeclaringTypeRef = DateTimeOffsetTypeRef
+                DeclaringTypeRef = DateTimeOffsetTypeRef,
+                ImplementingType = implementingType
             };
         }
 
-        private static PropertyGenerationSpec GetCreatorIdPropertySpec(Type propertyType, Location location)
+        private static PropertyGenerationSpec GetCreatorIdPropertySpec(Type propertyType, Location location, Type? implementingType)
         {
             Debug.Assert(propertyType is not null);
 
@@ -379,11 +260,12 @@ public sealed partial class AuditGenerator
                 IsUerKeyType = true,
                 Order = 992,
                 Comment = AuditDefaults.CreatorIdComment,
-                DeclaringTypeRef = propertyType.GetCompilableName()
+                DeclaringTypeRef = propertyType.GetCompilableName(),
+                ImplementingType = implementingType
             };
         }
 
-        private static PropertyGenerationSpec GetLastModificationTimePropertySpec(Location location)
+        private static PropertyGenerationSpec GetLastModificationTimePropertySpec(Location location, Type? implementingType)
         {
             return new PropertyGenerationSpec
             {
@@ -393,11 +275,12 @@ public sealed partial class AuditGenerator
                 IsNullable = true,
                 Order = 994,
                 Comment = AuditDefaults.LastModificationTimeComment,
-                DeclaringTypeRef = DateTimeOffsetTypeRef
+                DeclaringTypeRef = DateTimeOffsetTypeRef,
+                ImplementingType = implementingType
             };
         }
 
-        private static PropertyGenerationSpec GetLastModifierIdPropertySpec(Type propertyType, Location location)
+        private static PropertyGenerationSpec GetLastModifierIdPropertySpec(Type propertyType, Location location, Type? implementingType)
         {
             Debug.Assert(propertyType is not null);
 
@@ -410,11 +293,12 @@ public sealed partial class AuditGenerator
                 IsUerKeyType = true,
                 Order = 995,
                 Comment = AuditDefaults.LastModifierIdComment,
-                DeclaringTypeRef = propertyType.GetCompilableName()
+                DeclaringTypeRef = propertyType.GetCompilableName(),
+                ImplementingType = implementingType
             };
         }
 
-        private static PropertyGenerationSpec GetIsDeletedPropertySpec(Location location)
+        private static PropertyGenerationSpec GetIsDeletedPropertySpec(Location location, Type? implementingType)
         {
             return new PropertyGenerationSpec
             {
@@ -424,11 +308,12 @@ public sealed partial class AuditGenerator
                 IsNullable = false,
                 Order = 997,
                 Comment = AuditDefaults.IsDeletedComment,
-                DeclaringTypeRef = BooleanTypeRef
+                DeclaringTypeRef = BooleanTypeRef,
+                ImplementingType = implementingType
             };
         }
 
-        private static PropertyGenerationSpec GetDeletionTimePropertySpec(Location location)
+        private static PropertyGenerationSpec GetDeletionTimePropertySpec(Location location, Type? implementingType)
         {
             return new PropertyGenerationSpec
             {
@@ -438,11 +323,12 @@ public sealed partial class AuditGenerator
                 IsNullable = true,
                 Order = 998,
                 Comment = AuditDefaults.DeletionTimeComment,
-                DeclaringTypeRef = DateTimeOffsetTypeRef
+                DeclaringTypeRef = DateTimeOffsetTypeRef,
+                ImplementingType = implementingType
             };
         }
 
-        private static PropertyGenerationSpec GetDeleterIdPropertySpec(Type propertyType, Location location)
+        private static PropertyGenerationSpec GetDeleterIdPropertySpec(Type propertyType, Location location, Type? implementingType)
         {
             Debug.Assert(propertyType is not null);
 
@@ -455,7 +341,8 @@ public sealed partial class AuditGenerator
                 IsUerKeyType = true,
                 Order = 999,
                 Comment = AuditDefaults.DeleterIdComment,
-                DeclaringTypeRef = propertyType.GetCompilableName()
+                DeclaringTypeRef = propertyType.GetCompilableName(),
+                ImplementingType = implementingType
             };
         }
 

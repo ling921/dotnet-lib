@@ -5,6 +5,51 @@ namespace Ling.Reflection;
 
 internal static class TypeExtensions
 {
+    public static string GetFriendlyName(this Type type)
+    {
+        if (type.IsArray)
+        {
+            return GetFriendlyName(type.GetElementType()) + "[]";
+        }
+
+        string friendlyName;
+
+        if (!type.IsGenericType)
+        {
+            friendlyName = type.FullName;
+        }
+        else
+        {
+            StringBuilder sb = new();
+
+            string fullName = type.FullName;
+            int backTickIndex = fullName.IndexOf('`');
+
+            string baseName = fullName.Substring(0, backTickIndex);
+
+            sb.Append(baseName);
+
+            sb.Append("<");
+
+            Type[] genericArgs = type.GetGenericArguments();
+            int genericArgCount = genericArgs.Length;
+            List<string> genericArgNames = new(genericArgCount);
+
+            for (int i = 0; i < genericArgCount; i++)
+            {
+                genericArgNames.Add(GetFriendlyName(genericArgs[i]));
+            }
+
+            sb.Append(string.Join(", ", genericArgNames));
+
+            sb.Append(">");
+
+            friendlyName = sb.ToString();
+        }
+
+        return friendlyName.Replace("+", ".");
+    }
+
     public static string GetCompilableName(this Type type)
     {
         if (type.IsArray)
