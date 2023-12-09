@@ -1,8 +1,14 @@
-### Introduction
+# Ling.EntityFrameworkCore
+
+
+## Introduction
 
 `Ling.EntityFrameworkCore` is an extension library of `Microsoft.EntityFrameworkCore`.
 
-### Installation
+
+## Installation
+
+You can install `Ling.EntityFrameworkCore` using either Package Manager or .NET CLI.
 
 1. Package Manager
 ```
@@ -14,6 +20,11 @@ PM> Install-Package Ling.EntityFrameworkCore
 dotnet add package Ling.EntityFrameworkCore
 ```
 
-### Usage
+## Usage
 
 None
+
+
+# License
+
+This project is licensed under the Apache 2.0 license.
