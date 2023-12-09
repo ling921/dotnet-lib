@@ -6,7 +6,7 @@
 
 	<PropertyGroup>
 		<PackageId>Ling.EntityFrameworkCore</PackageId>
-		<PackageVersion>1.1.0-beta-202311201756</PackageVersion>
+		<PackageVersion>1.1.0</PackageVersion>
 		<Description>Ling.EntityFrameworkCore is an extension library of Microsoft.EntityFrameworkCore.</Description>
 		<PackageTags>ling;efcore;entityframeworkcore;</PackageTags>
 		<PackageReleaseNotes>Please Check https://github.com/ling921/dotnet-lib/blob/master/src/Ling.EntityFrameworkCore/RELEASE.md</PackageReleaseNotes>
