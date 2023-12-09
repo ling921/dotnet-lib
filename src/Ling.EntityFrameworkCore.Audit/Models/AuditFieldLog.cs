@@ -1,9 +1,9 @@
 ﻿namespace Ling.EntityFrameworkCore.Audit.Models;
 
 /// <summary>
-/// Represents the detail of <see cref="AuditLog"/>.
+/// Represents the detail of <see cref="AuditEntityLog{TUserKey}"/>.
 /// </summary>
-public class AuditLogDetail
+public class AuditFieldLog
 {
     /// <summary>
     /// Gets or sets the primary key.
@@ -11,9 +11,9 @@ public class AuditLogDetail
     public long Id { get; set; }
 
     /// <summary>
-    /// Gets or sets the primary key of <see cref="AuditLog"/>.
+    /// Gets or sets the primary key of <see cref="AuditEntityLog{TUserKey}"/>.
     /// </summary>
-    public long AuditLogId { get; set; }
+    public long EntityLogId { get; set; }
 
     /// <summary>
     /// Gets or sets the property name.

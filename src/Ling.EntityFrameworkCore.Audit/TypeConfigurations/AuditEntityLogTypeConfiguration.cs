@@ -4,22 +4,23 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Ling.EntityFrameworkCore.Audit.TypeConfigurations;
 
-internal sealed class AuditLogTypeConfiguration : IEntityTypeConfiguration<AuditLog>
+internal sealed class AuditEntityLogTypeConfiguration<TUserKey> : IEntityTypeConfiguration<AuditEntityLog<TUserKey>>
 {
-    public void Configure(EntityTypeBuilder<AuditLog> builder)
+    public void Configure(EntityTypeBuilder<AuditEntityLog<TUserKey>> builder)
     {
 #if NET7_0_OR_GREATER
-        builder.ToTable("AuditLogs", t => t.HasComment("A table that stores changes to entity properties."))
+        builder.ToTable(AuditDefaults.EntityChangeAuditLogTableName, t => t.HasComment("A table to record entities changes."))
                .HasKey(al => al.Id);
 #else
-        builder.ToTable("AuditLogs")
-               .HasComment("A table that stores changes to entity properties.");
+        builder.ToTable(AuditDefaults.EntityChangeAuditLogTableName)
+               .HasComment("A table to record entities changes.");
 
         builder.HasKey(al => al.Id);
 #endif
 
         builder.Property(al => al.Id)
-               .HasComment("The primary key for this entity.");
+               .ValueGeneratedOnAdd()
+               .HasComment("The primary key.");
 
         builder.Property(al => al.Schema)
                .IsUnicode(false)
@@ -51,8 +52,6 @@ internal sealed class AuditLogTypeConfiguration : IEntityTypeConfiguration<Audit
                .HasComment("The time the audit event occurred.");
 
         builder.Property(al => al.OperatorId)
-               .IsUnicode(true)
-               .HasMaxLength(512)
                .IsRequired(false)
                .HasComment("The identity of the user who change entity.");
 
@@ -64,7 +63,7 @@ internal sealed class AuditLogTypeConfiguration : IEntityTypeConfiguration<Audit
 
         builder.HasMany(al => al.Details)
                .WithOne()
-               .HasForeignKey(ald => ald.AuditLogId)
+               .HasForeignKey(ald => ald.EntityLogId)
                .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -17,6 +17,6 @@ internal sealed class AuditIgnoreAttributeConvention : PropertyAttributeConventi
         MemberInfo clrMember,
         IConventionContext context)
     {
-        propertyBuilder.Metadata.SetAnnotation(AuditAnnotationNames.Include, false);
+        propertyBuilder.Metadata.SetAnnotation(Constants.IncludeAnnotationName, false);
     }
 }

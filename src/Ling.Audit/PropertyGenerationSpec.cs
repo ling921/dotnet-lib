@@ -20,6 +20,8 @@ internal class PropertyGenerationSpec
 
     public string? Comment { get; set; }
 
+    public Type? ImplementingType { get; set; }
+
     /// <summary>
     /// Compilable name of the property's declaring type.
     /// </summary>

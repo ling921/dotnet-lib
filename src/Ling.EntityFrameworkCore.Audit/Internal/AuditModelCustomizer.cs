@@ -3,23 +3,19 @@ using Ling.EntityFrameworkCore.Audit.TypeConfigurations;
 using Ling.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Ling.EntityFrameworkCore.Audit.Internal;
 
-internal sealed class AuditModelCustomizer : ModelCustomizer
+internal sealed class AuditModelCustomizer<TUserKey> : ModelCustomizer
 {
-    private readonly IDbContextOptions _options;
     private readonly ILogger _logger;
 
     public AuditModelCustomizer(
         ModelCustomizerDependencies dependencies,
-        IDbContextOptions options,
         ILoggerFactory loggerFactory) : base(dependencies)
     {
-        _options = options;
-        _logger = loggerFactory.CreateLogger<AuditModelCustomizer>();
+        _logger = loggerFactory.CreateLogger<AuditModelCustomizer<TUserKey>>();
     }
 
     /// <inheritdoc/>
@@ -27,24 +23,15 @@ internal sealed class AuditModelCustomizer : ModelCustomizer
     {
         base.Customize(modelBuilder, context);
 
-        AuditOptions auditOptions;
-        var action = _options?.FindExtension<AuditOptionsExtension>()?.Action;
-        if (action is null)
-        {
-            var configuration = context.GetService<IConfiguration>();
-            auditOptions = configuration.GetSection("Audit").Get<AuditOptions>() ?? new AuditOptions();
-        }
-        else
-        {
-            auditOptions = new AuditOptions();
-            action.Invoke(auditOptions);
-        }
+        var auditOptions = context.GetAuditOptions();
 
-        modelBuilder.ApplyConfiguration(new AuditLogTypeConfiguration());
-        modelBuilder.ApplyConfiguration(new AuditLogDetailTypeConfiguration());
+        modelBuilder.ApplyConfiguration(new AuditEntityLogTypeConfiguration<TUserKey>());
+        modelBuilder.ApplyConfiguration(new AuditFieldLogTypeConfiguration());
 
-        modelBuilder.ConfigureAuditEntities(auditOptions.Comments);
+        modelBuilder.ConfigureAuditableEntities(auditOptions.Comments);
 
-        _logger.LogInformation("Complete the audit entity configuration.");
+        modelBuilder.SetupSoftDeleteQueryFilter();
+
+        _logger.LogInformation("Complete the audit entity model configuration.");
     }
 }

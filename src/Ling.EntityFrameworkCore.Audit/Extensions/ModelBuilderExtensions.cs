@@ -17,19 +17,92 @@ namespace Ling.EntityFrameworkCore.Extensions;
 /// </summary>
 public static class ModelBuilderExtensions
 {
-    /// <summary>
-    /// Gets whether the current program is running at design time.
-    /// </summary>
-    public static bool IsDesignTime => Process.GetCurrentProcess().ProcessName == "dotnet";
-
     #region Public Methods
 
     /// <summary>
-    /// Configure properties of audit entities.
+    /// Setup a global query filter for entities has "IsDeleted" property.
+    /// </summary>
+    /// <param name="builder">Entity model builder.</param>
+    public static void SetupSoftDeleteQueryFilter(this ModelBuilder builder)
+    {
+        foreach (var entityType in builder.Model.GetEntityTypes())
+        {
+            var type = entityType.ClrType;
+
+            if (entityType.HasProperty(Constants.IsDeleted))
+            {
+                var typeParameter = Expression.Parameter(type, "e");
+                var propertyParameter = Expression.Property(typeParameter, Constants.IsDeleted);
+                var lambda = Expression.Lambda(Expression.Not(propertyParameter), typeParameter);
+
+                builder.Entity(type).HasQueryFilter(lambda);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Configures enable auditing to be applied to the table this entity is mapped to.
+    /// </summary>
+    /// <param name="entityTypeBuilder">The builder for the entity type being configured.</param>
+    /// <param name="allowAnonymousOperate">
+    /// Allowed anonymous operations to the table this entity is mapped to.
+    /// </param>
+    /// <returns>The same builder instance so that multiple calls can be chained.</returns>
+    public static EntityTypeBuilder IsAuditable(this EntityTypeBuilder entityTypeBuilder, AuditOperate allowAnonymousOperate = AuditOperate.None)
+    {
+        ArgumentNullException.ThrowIfNull(entityTypeBuilder);
+
+        entityTypeBuilder.Metadata.SetAnnotation(Constants.IncludeAnnotationName, true);
+        entityTypeBuilder.Metadata.SetAuditMetadata(new AuditMetadata { AllowAnonymousOperate = allowAnonymousOperate });
+
+        return entityTypeBuilder;
+    }
+
+    /// <inheritdoc cref="IsAuditable(EntityTypeBuilder, AuditOperate)"/>
+    /// <typeparam name="TEntity">The entity type being configured.</typeparam>
+    public static EntityTypeBuilder<TEntity> IsAuditable<TEntity>(this EntityTypeBuilder<TEntity> entityTypeBuilder, AuditOperate allowAnonymousOperate = AuditOperate.None)
+        where TEntity : class
+        => (EntityTypeBuilder<TEntity>)((EntityTypeBuilder)entityTypeBuilder).IsAuditable(allowAnonymousOperate);
+
+    /// <summary>
+    /// Configures whether to apply auditing to the column.
+    /// </summary>
+    /// <param name="propertyBuilder">The builder for the property being configured.</param>
+    /// <param name="enabled">Whether to audit the column, defaults to <see langword="false"/>.</param>
+    /// <returns>The same builder instance so that multiple calls can be chained.</returns>
+    public static PropertyBuilder IsAuditable(this PropertyBuilder propertyBuilder, bool enabled = false)
+    {
+        ArgumentNullException.ThrowIfNull(propertyBuilder);
+
+        propertyBuilder.Metadata.SetAnnotation(Constants.IncludeAnnotationName, enabled);
+        return propertyBuilder;
+    }
+
+    /// <inheritdoc cref="IsAuditable(PropertyBuilder, bool)"/>
+    /// <typeparam name="TProperty">The type of the property being configured.</typeparam>
+    public static PropertyBuilder<TProperty> IsAuditable<TProperty>(this PropertyBuilder<TProperty> propertyBuilder, bool enabled = false)
+        => (PropertyBuilder<TProperty>)((PropertyBuilder)propertyBuilder).IsAuditable(enabled);
+
+    #endregion Public Methods
+
+    #region Internal Methods
+
+#if NET6_0
+
+    /// <summary>
+    /// Gets whether the current program is running at design time.
+    /// </summary>
+    internal static bool IsDesignTime => Path.GetFileName(Environment.GetCommandLineArgs().FirstOrDefault()) == "ef.dll";
+
+#endif
+
+    /// <summary>
+    /// Configure properties of auditable entities.
     /// </summary>
     /// <param name="builder">Entity model builder.</param>
     /// <param name="comments">Comments to the audited entities.</param>
-    public static void ConfigureAuditEntities(this ModelBuilder builder, AuditEntityComments comments)
+    /// <returns>The identity type of user for current <see cref="DbContext"/>.</returns>
+    internal static Type? ConfigureAuditableEntities(this ModelBuilder builder, AuditEntityComments comments)
     {
         Type? entityClrType = null;
         Type? userKeyType = null;
@@ -124,86 +197,25 @@ public static class ModelBuilderExtensions
 
             entityType.SetAuditMetadata(auditMetadata);
 
+#if NET6_0
             if (IsDesignTime)
+#else
+            if (EF.IsDesignTime)
+#endif
             {
-                entityType.RemoveAnnotation(AuditAnnotationNames.Metadata);
+                Debug.WriteLine("Currently running in design time.");
+                entityType.RemoveAnnotation(Constants.MetadataAnnotationName);
             }
         }
+
+        return userKeyType;
     }
-
-    /// <summary>
-    /// Setup a global query filter for entities has "IsDeleted" property.
-    /// </summary>
-    /// <param name="builder">Entity model builder.</param>
-    public static void SetupSoftDeleteQueryFilter(this ModelBuilder builder)
-    {
-        foreach (var entityType in builder.Model.GetEntityTypes())
-        {
-            var type = entityType.ClrType;
-
-            if (entityType.HasProperty(Constants.IsDeleted))
-            {
-                var typeParameter = Expression.Parameter(type, "e");
-                var propertyParameter = Expression.Property(typeParameter, Constants.IsDeleted);
-                var lambda = Expression.Lambda(Expression.Not(propertyParameter), typeParameter);
-
-                builder.Entity(type).HasQueryFilter(lambda);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Configures enable auditing to be applied to the table this entity is mapped to.
-    /// </summary>
-    /// <param name="entityTypeBuilder">The builder for the entity type being configured.</param>
-    /// <param name="allowAnonymousOperate">
-    /// Allowed anonymous operations to the table this entity is mapped to.
-    /// </param>
-    /// <returns>The same builder instance so that multiple calls can be chained.</returns>
-    public static EntityTypeBuilder IsAuditable(this EntityTypeBuilder entityTypeBuilder, AuditOperate allowAnonymousOperate = AuditOperate.None)
-    {
-        ArgumentNullException.ThrowIfNull(entityTypeBuilder);
-
-        entityTypeBuilder.Metadata.SetAnnotation(AuditAnnotationNames.Include, true);
-        entityTypeBuilder.Metadata.SetAuditMetadata(new AuditMetadata { AllowAnonymousOperate = allowAnonymousOperate });
-
-        return entityTypeBuilder;
-    }
-
-    /// <inheritdoc cref="IsAuditable(EntityTypeBuilder, AuditOperate)"/>
-    /// <typeparam name="TEntity">The entity type being configured.</typeparam>
-    public static EntityTypeBuilder<TEntity> IsAuditable<TEntity>(this EntityTypeBuilder<TEntity> entityTypeBuilder, AuditOperate allowAnonymousOperate = AuditOperate.None)
-        where TEntity : class
-        => (EntityTypeBuilder<TEntity>)((EntityTypeBuilder)entityTypeBuilder).IsAuditable(allowAnonymousOperate);
-
-    /// <summary>
-    /// Configures whether to apply auditing to the column.
-    /// </summary>
-    /// <param name="propertyBuilder">The builder for the property being configured.</param>
-    /// <param name="enabled">Whether to audit the column, defaults to <see langword="false"/>.</param>
-    /// <returns>The same builder instance so that multiple calls can be chained.</returns>
-    public static PropertyBuilder IsAuditable(this PropertyBuilder propertyBuilder, bool enabled = false)
-    {
-        ArgumentNullException.ThrowIfNull(propertyBuilder);
-
-        propertyBuilder.Metadata.SetAnnotation(AuditAnnotationNames.Include, enabled);
-        return propertyBuilder;
-    }
-
-    /// <inheritdoc cref="IsAuditable(PropertyBuilder, bool)"/>
-    /// <typeparam name="TProperty">The type of the property being configured.</typeparam>
-    public static PropertyBuilder<TProperty> IsAuditable<TProperty>(this PropertyBuilder<TProperty> propertyBuilder, bool enabled = false)
-        => (PropertyBuilder<TProperty>)((PropertyBuilder)propertyBuilder).IsAuditable(enabled);
-
-    #endregion Public Methods
-
-    #region Internal Methods
 
     internal static bool GetAuditInclude(this IReadOnlyAnnotatable annotatable)
     {
         ArgumentNullException.ThrowIfNull(annotatable);
 
-        var value = annotatable.FindAnnotation(AuditAnnotationNames.Include)?.Value;
+        var value = annotatable.FindAnnotation(Constants.IncludeAnnotationName)?.Value;
         return annotatable switch
         {
             IEntityType => value is not null && (bool)value, // Entity auditable defaults to false
@@ -217,14 +229,14 @@ public static class ModelBuilderExtensions
         ArgumentNullException.ThrowIfNull(entityType);
         ArgumentNullException.ThrowIfNull(metadata);
 
-        if (entityType.FindAnnotation(AuditAnnotationNames.Metadata)?.Value is AuditMetadata original)
+        if (entityType.FindAnnotation(Constants.MetadataAnnotationName)?.Value is AuditMetadata original)
         {
             original.Append(metadata);
-            entityType.SetAnnotation(AuditAnnotationNames.Metadata, original);
+            entityType.SetAnnotation(Constants.MetadataAnnotationName, original);
         }
         else
         {
-            entityType.SetAnnotation(AuditAnnotationNames.Metadata, metadata);
+            entityType.SetAnnotation(Constants.MetadataAnnotationName, metadata);
         }
     }
 
@@ -232,7 +244,7 @@ public static class ModelBuilderExtensions
     {
         ArgumentNullException.ThrowIfNull(entityType);
 
-        return entityType.FindAnnotation(AuditAnnotationNames.Metadata)?.Value is AuditMetadata metadata
+        return entityType.FindAnnotation(Constants.MetadataAnnotationName)?.Value is AuditMetadata metadata
             ? metadata
             : new AuditMetadata();
     }
@@ -250,15 +262,15 @@ public static class ModelBuilderExtensions
         }
         else if (userKeyType != currentUserKeytype)
         {
-            const string msg = "All audit entities in the same 'DbContext' cannot have different user key types.";
+            const string msg = "All audit entities in the same 'DbContext' cannot have different user's identity types.";
             var desc = entityType == currentEntityType
                 ? string.Format(
-                    "Entity type '{0}' has both type '{1}' and type '{2}' as user key type.",
+                    "Entity type '{0}' has both type '{1}' and type '{2}' as user's identity type.",
                     currentEntityType.GetFriendlyName(),
                     userKeyType.GetFriendlyName(),
                     currentUserKeytype.GetFriendlyName())
                 : string.Format(
-                    "Entity type '{0}' has type '{1}' as user key type but entity '{2}' has type '{3}' as user key type.",
+                    "Entity type '{0}' has type '{1}' as user key type but entity '{2}' has type '{3}' as user's identity type.",
                     entityType!.GetFriendlyName(),
                     userKeyType.GetFriendlyName(),
                     currentEntityType.GetFriendlyName(),
@@ -272,7 +284,7 @@ public static class ModelBuilderExtensions
         if (!propertyType.IsAssignableFrom(typeof(DateTimeOffset)))
         {
             throw new InvalidOperationException(string.Format(
-                "Entity type '{0}' member '{1}' type '{2}' is neither 'DateTimeOffset' nor 'DateTimeOffset?'.",
+                "Type '{2}' of member '{1}' in entity type '{0}' is neither 'DateTimeOffset' nor 'DateTimeOffset?'.",
                 currentEntityType.GetFriendlyName(),
                 propertyName,
                 propertyType.GetFriendlyName()));
@@ -284,7 +296,7 @@ public static class ModelBuilderExtensions
         if (!propertyType.IsAssignableFrom(typeof(bool)))
         {
             throw new InvalidOperationException(string.Format(
-                "Entity type '{0}' member '{1}' type '{2}' is not 'bool'.",
+                "Type '{2}' of member '{1}' in entity type '{0}' is not 'bool'.",
                 currentEntityType.GetFriendlyName(),
                 propertyName,
                 propertyType.GetFriendlyName()));

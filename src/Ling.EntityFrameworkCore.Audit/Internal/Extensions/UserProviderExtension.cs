@@ -4,8 +4,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Ling.EntityFrameworkCore.Audit.Internal.Extensions;
 
-internal sealed class UserProviderExtension<TUserProvider> : IDbContextOptionsExtension
-    where TUserProvider : class, IAuditUserProvider
+internal sealed class UserProviderExtension<TUserProvider, TUserKey> : IDbContextOptionsExtension
+    where TUserProvider : class, IAuditUserProvider<TUserKey>
 {
     /// <inheritdoc/>
     public DbContextOptionsExtensionInfo Info => new UserProviderExtensionInfo(this);
@@ -13,7 +13,7 @@ internal sealed class UserProviderExtension<TUserProvider> : IDbContextOptionsEx
     /// <inheritdoc/>
     public void ApplyServices(IServiceCollection services)
     {
-        services.TryAddScoped<IAuditUserProvider, TUserProvider>();
+        services.TryAddScoped<IAuditUserProvider<TUserKey>, TUserProvider>();
     }
 
     /// <inheritdoc/>

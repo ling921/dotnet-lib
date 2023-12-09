@@ -12,7 +12,7 @@
 	<PropertyGroup>
 		<PackageId></PackageId>
 		<PackageVersion></PackageVersion>
-		<Authors>LingDev</Authors>
+		<Authors>ling921</Authors>
 		<Description></Description>
 		<Copyright>Copyright © 2022-2023 LingDev All rights reserved.</Copyright>
 		<PackageProjectUrl>https://github.com/ling921/dotnet-lib</PackageProjectUrl>

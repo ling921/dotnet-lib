@@ -1,8 +1,8 @@
-### Introduction
+## Introduction
 
 Ling.EntityFrameworkCore.Audit is an extension library that can automatically record entity changes of `Microsoft.EntityFrameworkCore`.
 
-### Installation
+## Installation
 
 1. Package Manager
 ```
@@ -16,7 +16,7 @@ dotnet add package Ling.Audit
 dotnet add package Ling.EntityFrameworkCore.Audit
 ```
 
-### Usage
+## Usage
 
 1. Add `UseAudit()` in your `DbContext` service registration code.
 
@@ -54,3 +54,23 @@ builder.Entity<Post>(b =>
     b.Property(e => e.CreationTime).IsAuditable(false);
 });
 ```
+
+## Confuguration
+
+1. A switch to enable/disable auditing globally.
+
+```csharp
+AppContext.SetSwitch(AuditDefaults.DisabledSwitchKey, false); // disable
+AppContext.SetSwitch(AuditDefaults.DisabledSwitchKey, true); // enable
+```
+
+note: you may want to disable auditing when applying seed data.
+
+2. Configure audit record table names.
+
+```csharp
+AuditDefaults.EntityChangeAuditLogTableName = "AuditEntityLog"; // for entity
+AuditDefaults.EntityFieldChangeAuditLogTableName = "AuditFieldLog"; // for entity's field
+```
+
+warn: change table names needs to create a new migration.
