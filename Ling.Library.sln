@@ -26,6 +26,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ling.Blazor", "src\Ling.Bla
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ling.Blazor.Authentication", "src\Ling.Blazor.Authentication\Ling.Blazor.Authentication.csproj", "{962AAD5F-AA45-4D37-A094-0A39891B31FD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{63522238-7EBA-4609-9CB4-522E338589F0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ling.Blazor.Example", "examples\Ling.Blazor.Example\Ling.Blazor.Example.csproj", "{1A565C01-4A41-45C5-A06F-F8D1C44A5E8D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -60,6 +64,10 @@ Global
 		{962AAD5F-AA45-4D37-A094-0A39891B31FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{962AAD5F-AA45-4D37-A094-0A39891B31FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{962AAD5F-AA45-4D37-A094-0A39891B31FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A565C01-4A41-45C5-A06F-F8D1C44A5E8D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A565C01-4A41-45C5-A06F-F8D1C44A5E8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A565C01-4A41-45C5-A06F-F8D1C44A5E8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A565C01-4A41-45C5-A06F-F8D1C44A5E8D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -72,6 +80,7 @@ Global
 		{AFC17BBE-556E-4541-B0F0-05E370008C29} = {24190368-2682-445A-B3DE-DBDCA91CC22D}
 		{77D13DA1-47B1-4D63-8813-4EC22183B2B4} = {24190368-2682-445A-B3DE-DBDCA91CC22D}
 		{962AAD5F-AA45-4D37-A094-0A39891B31FD} = {24190368-2682-445A-B3DE-DBDCA91CC22D}
+		{1A565C01-4A41-45C5-A06F-F8D1C44A5E8D} = {63522238-7EBA-4609-9CB4-522E338589F0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1A856CE4-1FBD-47C1-8117-82B5C4C6CD5E}
