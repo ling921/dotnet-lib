@@ -14,4 +14,3 @@ This is a dotnet library repository that contains the following public libraries
 ## License
 
 This project is licensed under the [Apache-2.0](LICENSE.md)
-Creative Commons License - see the [LICENSE.md](LICENSE.md) file for details
