@@ -1,0 +1,35 @@
+﻿@page "/counter"
+
+<PageTitle>Counter</PageTitle>
+
+<h1>Counter</h1>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+<br />
+
+<Switch Value="currentCount">
+    <Case When="1">
+        Current count is 1
+    </Case>
+    <Case When="2">
+        Current count is 2
+    </Case>
+    <Case When="10">
+        Current count is 10
+    </Case>
+    <Default>
+        Current count is not 1, 2, or 10
+    </Default>
+</Switch>
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}
