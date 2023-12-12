@@ -1,8 +1,12 @@
-### Introduction
+# Ling.Blazor
 
-`Ling.Blazor` is a library for `Blazor`.
 
-### Installation
+## Introduction
+
+`Ling.Blazor` is a library of Blazor.
+
+
+## Installation
 
 1. Package Manager
 ```
@@ -14,63 +18,78 @@ PM> Install-Package Ling.Blazor
 dotnet add package Ling.Blazor
 ```
 
-### Usage
 
-1. ConditionView
+## Usage
+
+1. Condition
+
+Display content only when condition is `true`
+
 ```razor
 @using Ling.Blazor.Components;
 
-<ConditionView Predicate="@condition">
-    <TrueContent>
-        // display when condition is true
-    </TrueContent>
-    <FalseContent>
-        // display when condition is false
-    </FalseContent>
-</ConditionView>
-```
-or 
-```razor
-@using Ling.Blazor.Components;
-
-<ConditionView Predicate="@condition">
+<Condition Predicate="@condition">
     // display when condition is true
-</ConditionView>
+</Condition>
 ```
 
-2. EnumerationView
+Display content both when condition is `true` and `false`
+
 ```razor
 @using Ling.Blazor.Components;
 
-<EnumerationView Source="@list">
-    <EachTemplate Context="item">
+<Condition Predicate="@condition">
+    <True>
+        // display when condition is true
+    </True>
+    <False>
+        // display when condition is false
+    </False>
+</Condition>
+```
+
+2. ForEach
+
+```razor
+@using Ling.Blazor.Components;
+
+<ForEach Source="@list">
+    <Template Context="item">
         // display each with @item
-    </EachTemplate>
-    <SeparatorContent>
+    </Template>
+    <Separator>
         // display separator between items, optional
-    </SeparatorContent>
-    <EmptyContent>
-        // display when list is null or empty, optional, defalut is string "empty"
-    </EmptyContent>
-</EnumerationView>
+    </Separator>
+    <NoContent>
+        // display when list is null or empty, optional
+    </NoContent>
+</ForEach>
 ```
 
-3. SwitchView
+3. Switch
+
 ```razor
 @using Ling.Blazor.Components;
 
-<SwitchView Value="@value">
-    <SwitchCase When="1">
+<Switch Value="@value">
+    <Case When="1">
         // display when value is 1
-    </SwitchCase>
-    <SwitchCase When="2">
+    </Case>
+    <Case When="2">
         // display when value is 2
-    </SwitchCase>
+    </Case>
 
     ...
 
-    <SwitchDefault>
+    <Default>
         // display when value not matched
-    </SwitchDefault>
-</SwitchView>
+    </Default>
+</Switch>
 ```
+
+> Note: Be careful when using `Switch` with string value, if value is number, you should use like `<Case When="@("1")">`
+
+
+# License
+
+This project is licensed under the Apache 2.0 license
