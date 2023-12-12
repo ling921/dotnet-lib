@@ -26,8 +26,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="..\..\resources\icon.png" Link="icon.png" Pack="true" PackagePath="\"/>
-		<Content Include="..\..\LICENSE" Link="LICENSE" Pack="true" PackagePath="\"/>
+		<Content Include="..\..\resources\icon.png" Link="icon.png" Pack="true" PackagePath="\" Visible="False" />
+		<Content Include="..\..\LICENSE" Link="LICENSE" Pack="true" PackagePath="\" Visible="False" />
 	</ItemGroup>
 
 </Project>
