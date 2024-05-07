@@ -35,6 +35,7 @@ internal class TypeGenerationSpec
                 first = false;
             }
 
+            propertyGenSpec.IsVirtual = !ClassDeclaration.Contains("sealed");
             sb.Append(propertyGenSpec.ToString().Indent(1));
         }
 

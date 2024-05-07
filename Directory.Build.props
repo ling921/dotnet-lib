@@ -14,7 +14,7 @@
 		<PackageVersion></PackageVersion>
 		<Authors>ling921</Authors>
 		<Description></Description>
-		<Copyright>Copyright © 2022-2023 LingDev All rights reserved.</Copyright>
+		<Copyright>Copyright © 2022-2023 ling921 All rights reserved.</Copyright>
 		<PackageProjectUrl>https://github.com/ling921/dotnet-lib</PackageProjectUrl>
 		<PackageIcon>icon.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
