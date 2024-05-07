@@ -10,6 +10,8 @@ internal class PropertyGenerationSpec
 
     public string ClrName { get; set; } = null!;
 
+    public bool IsVirtual { get; set; } = true;
+
     public bool IsValueType { get; set; }
 
     public bool IsNullable { get; set; }
@@ -37,6 +39,6 @@ internal class PropertyGenerationSpec
 /// <summary>
 /// {Comment}
 /// </summary>
-public virtual {propertyTypeRef} {ClrName} {{ get; set; }}";
+public {(IsVirtual ? "virtual " : string.Empty)}{propertyTypeRef} {ClrName} {{ get; set; }}";
     }
 }
