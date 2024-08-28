@@ -8,7 +8,7 @@ namespace Ling.EntityFrameworkCore.Audit;
 public static class AuditDefaults
 {
     /// <summary>
-    /// The key of the <see cref="AppContext"/> for disable auditing. Setting this value to <see langword="true"/> will disable.
+    /// The key of the <see cref="AppContext"/> for disable auditing. Setting this value to <see langword="true"/> will disable auditing.
     /// </summary>
     public const string DisabledSwitchKey = "Ling.DisableAudit";
 

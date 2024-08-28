@@ -186,6 +186,7 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
 
         if (context is null || (AppContext.TryGetSwitch(AuditDefaults.DisabledSwitchKey, out var disabled) && disabled)) return 0;
 
+        var options = context.GetAuditOptions();
         var logger = context.GetService<ILoggerFactory>().CreateLogger(GetType());
         if (!s_contextEntries.TryRemove(context.ContextId, out var entryInfo))
         {
@@ -213,18 +214,24 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
                 }),
             });
 
-        var count = logs.Sum(i => i.Details.Count + 1);
-        if (count > 0)
+        int entityChangedCount = 0, fieldChangedCount = 0;
+        foreach (var log in logs)
         {
-            context.AddRange(logs);
-
-            logger.LogInformation(
-                "Add {Count} audit logs to {DbContextType}[{ContextId}].",
-                count,
-                context.GetType().GetFriendlyName(),
-                context.ContextId);
+            if (log.Details.Count > 0 || options.AuditNoFieldChangeEntity)
+            {
+                context.Add(log);
+                entityChangedCount++;
+                fieldChangedCount += log.Details.Count;
+            }
         }
-        return count;
+
+        logger.LogInformation(
+            "Add {EntityCount} entity changed and {FieldCount} field changed audit logs to {DbContextType}[{ContextId}].",
+            entityChangedCount,
+            fieldChangedCount,
+            context.GetType().GetFriendlyName(),
+            context.ContextId);
+        return entityChangedCount + fieldChangedCount;
     }
 
     private static bool TryGetAuditEntry(EntityEntry entityEntry, [NotNullWhen(true)] out AuditEntry? auditEntry)
@@ -280,6 +287,15 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
 
         try
         {
+            if (value is DateTime dt)
+            {
+                return dt.ToString("yyyy-MM-dd HH:mm:ss");
+            }
+            else if (value is DateTimeOffset dto)
+            {
+                return dto.ToString("yyyy-MM-dd HH:mm:ss zzz");
+            }
+
             var converter = TypeDescriptor.GetConverter(value);
             if (converter.CanConvertTo(typeof(string)))
             {
