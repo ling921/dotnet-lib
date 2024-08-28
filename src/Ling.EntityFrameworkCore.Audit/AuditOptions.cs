@@ -51,6 +51,11 @@ public class AuditOptions
     /// Comments.
     /// </summary>
     public AuditEntityComments Comments { get; set; } = new();
+
+    /// <summary>
+    /// Whether to audit entities that has no field changes, default to <see langword="false"/>.
+    /// </summary>
+    public bool AuditNoFieldChangeEntity { get; set; }
 }
 
 /// <summary>
