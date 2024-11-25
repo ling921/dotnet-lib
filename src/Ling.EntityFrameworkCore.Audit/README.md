@@ -42,7 +42,7 @@ public class Post
     public int Id { get; set; }
     public string Title { get; set; } = null!;
     [AuditIgnore]
-    public DateTimeOffset CreationTime { get; set; } = null!;
+    public DateTimeOffset CreationTime { get; set; }
 }
 ```
 

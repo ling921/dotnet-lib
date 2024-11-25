@@ -15,9 +15,9 @@ using System.Text.Json;
 
 namespace Ling.EntityFrameworkCore.Audit.Internal;
 
-internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
+internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor, IDisposable
 {
-    private static readonly ConcurrentDictionary<DbContextId, List<AuditEntry>> s_contextEntries = new();
+    private IReadOnlyList<AuditEntry>? _entries;
 
     /// <inheritdoc/>
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
@@ -176,7 +176,7 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
 
         if (!AppContext.TryGetSwitch(AuditDefaults.DisabledSwitchKey, out var disabled) || !disabled)
         {
-            s_contextEntries.TryAdd(eventData.Context!.ContextId, entries);
+            _entries = entries;
         }
     }
 
@@ -188,15 +188,15 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
 
         var options = context.GetAuditOptions();
         var logger = context.GetService<ILoggerFactory>().CreateLogger(GetType());
-        if (!s_contextEntries.TryRemove(context.ContextId, out var entryInfo))
+        if (_entries is null)
         {
             logger.LogWarning("Unable to get entry information when saved changes.");
             throw new InvalidOperationException("Unable to get entry information before saving changes.");
         }
 
         var userProvider = context.GetService<IAuditUserProvider<TUserKey>>();
-        var logs = entryInfo
-            .ConvertAll(i => new AuditEntityLog<TUserKey>
+        var logs = _entries
+            .Select(i => new AuditEntityLog<TUserKey>
             {
                 Schema = i.Schema,
                 Table = i.Table,
@@ -206,13 +206,14 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
                 EventTime = DateTimeOffset.Now,
                 OperatorId = userProvider.Id,
                 OperatorName = userProvider.Name,
-                Details = i.Properties.ConvertAll(ii => new AuditFieldLog
+                Details = i.Properties.ConvertAll(j => new AuditFieldLog
                 {
-                    PropertyName = i.EntityType + '.' + ii.PropertyName,
-                    OriginalValue = GetStringValue(ii.OriginalValue),
-                    NewValue = GetStringValue(ii.NewValue),
+                    PropertyName = i.EntityType + '.' + j.PropertyName,
+                    OriginalValue = GetStringValue(j.OriginalValue),
+                    NewValue = GetStringValue(j.NewValue),
                 }),
-            });
+            })
+            .ToList();
 
         int entityChangedCount = 0, fieldChangedCount = 0;
         foreach (var log in logs)
@@ -296,7 +297,7 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
                 return dto.ToString("yyyy-MM-dd HH:mm:ss zzz");
             }
 
-            var converter = TypeDescriptor.GetConverter(value);
+            var converter = TypeDescriptor.GetConverter(value.GetType());
             if (converter.CanConvertTo(typeof(string)))
             {
                 return converter.ConvertToString(value);
@@ -305,5 +306,11 @@ internal sealed class AuditInterceptor<TUserKey> : SaveChangesInterceptor
         catch { }
 
         return JsonSerializer.Serialize(value);
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        _entries = null;
     }
 }

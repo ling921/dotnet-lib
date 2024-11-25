@@ -64,8 +64,8 @@ public static class QueryableExtensions
     /// <exception cref="ArgumentOutOfRangeException"></exception>
     public static async ValueTask<(int Total, IEnumerable<TSource> Items)> ToPagedAsync<TSource>(
         this IQueryable<TSource> source,
-        int offset = 0,
-        int limit = 10,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         if (offset < 0)
@@ -102,8 +102,8 @@ public static class QueryableExtensions
     public static async ValueTask<(int Total, IEnumerable<TResult> Items)> ToPagedAsync<TSource, TResult>(
         this IQueryable<TSource> source,
         Expression<Func<TSource, TResult>> selector,
-        int offset = 0,
-        int limit = 10,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(selector);
@@ -142,8 +142,8 @@ public static class QueryableExtensions
     public static async ValueTask<(int Total, IEnumerable<TResult> Items)> ToPagedAsync<TSource, TResult>(
         this IQueryable<TSource> source,
         Func<IQueryable<TSource>, IQueryable<TResult>> projector,
-        int offset = 0,
-        int limit = 10,
+        int offset,
+        int limit,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(projector);

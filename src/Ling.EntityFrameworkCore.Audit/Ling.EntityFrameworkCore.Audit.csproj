@@ -1,19 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net7.0;net8.0;</TargetFrameworks>
+    <TargetFrameworks>net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
   </PropertyGroup>
 
-	<PropertyGroup>
-		<PackageId>Ling.EntityFrameworkCore.Audit</PackageId>
-		<PackageVersion>1.1.1</PackageVersion>
-		<Description>An extension library that can automatically record entity changes of Microsoft.EntityFrameworkCore.</Description>
-		<PackageTags>ling;efcore;entityframeworkcore;audit;</PackageTags>
-		<PackageReleaseNotes>Please Check https://github.com/ling921/dotnet-lib/blob/master/src/Ling.EntityFrameworkCore.Audit/RELEASE.md</PackageReleaseNotes>
-	</PropertyGroup>
+  <PropertyGroup>
+    <PackageId>Ling.EntityFrameworkCore.Audit</PackageId>
+    <PackageVersion>1.2.0</PackageVersion>
+    <Description>An extension library that can automatically record entity changes of Microsoft.EntityFrameworkCore.</Description>
+    <PackageTags>ling;efcore;entityframeworkcore;audit;</PackageTags>
+    <PackageReleaseNotes>Please Check https://github.com/ling921/dotnet-lib/blob/master/src/Ling.EntityFrameworkCore.Audit/RELEASE.md</PackageReleaseNotes>
+  </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[6.0.0,7.0.0)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[6.0.35,7.0.0)" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="[6.0.0,7.0.0)" />
   </ItemGroup>
 
@@ -23,17 +23,22 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[8.0.0,9.0.0)" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[8.0.10,9.0.0)" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="[8.0.0,9.0.0)" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net9.0' ">
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="[9.0.0,10.0.0)" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="[9.0.0,10.0.0)" />
   </ItemGroup>
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-	</ItemGroup>
+  </ItemGroup>
 
-	<ItemGroup>
-		<None Include="README.md" Pack="true" PackagePath="\" />
-		<None Include="RELEASE.md" Pack="true" PackagePath="\" />
-	</ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="RELEASE.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
 </Project>
